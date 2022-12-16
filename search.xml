@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>game非预期</title>
+      <link href="/2022/12/16/game%E9%9D%9E%E9%A2%84%E6%9C%9F/"/>
+      <url>/2022/12/16/game%E9%9D%9E%E9%A2%84%E6%9C%9F/</url>
+      
+        <content type="html"><![CDATA[<p>这次game盯了好久，结果大家都是非预期。特此来学习一下</p><p>我们的内核题大概是先在start.sh中启动qemu，然后启用文件系统里的init脚本</p><p><img src="1.png" alt="解压后的文件系统"></p><p><img src="2.png" alt="init脚本"></p><p>那么问题就在，如果我们原本的文件系统中bin文件夹没有设置root为所有者，而且init的脚本也没有设置相应的权限变动，<strong>最终题目呈现的结果就是做题者对bin文件夹拥有rwx权限，可以随便增删查改bin中的所有命令</strong></p><p>再看我们的init脚本</p><p>用1000的uid（即chal用户）执行完/bin/sh后，用root权限调用了umount,poweroff命令，如果我们把umount,poweroff任意一个换成/bin/sh，并结束当前的/bin/sh，就相当于root权限执行了/bin/sh实现了提权</p><p>不知道poweroff替换为啥失败了，还是用大家都用的替换umount试验一下</p><p><img src="3.png" alt="替换umount提权"></p><p>要避免这种非预期很简单，在init脚本中chown bin sbin这些文件夹给root，或者直接输命令chown它们就行了，不再赘述了</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> pwn </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> study </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>RCTF2022diary</title>
       <link href="/2022/12/13/RCTF2022diary/"/>
       <url>/2022/12/13/RCTF2022diary/</url>
