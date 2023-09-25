@@ -4,6 +4,25 @@
   
     
     <entry>
+      <title>2023925</title>
+      <link href="/2023/09/25/2023-9-25/"/>
+      <url>/2023/09/25/2023-9-25/</url>
+      
+        <content type="html"><![CDATA[<h1 id="内存管理"><a href="#内存管理" class="headerlink" title="内存管理"></a>内存管理</h1><h2 id="12-7"><a href="#12-7" class="headerlink" title="12.7"></a>12.7</h2><h3 id="12-7-1"><a href="#12-7-1" class="headerlink" title="12.7.1"></a>12.7.1</h3><p>中断栈</p><h3 id="12-7-2-栈上正大光明工作"><a href="#12-7-2-栈上正大光明工作" class="headerlink" title="12.7.2 栈上正大光明工作"></a>12.7.2 栈上正大光明工作</h3><p>尽量动态分配，内核栈有限</p><h2 id="12-8-高端内存的映射"><a href="#12-8-高端内存的映射" class="headerlink" title="12.8 高端内存的映射"></a>12.8 高端内存的映射</h2><h3 id="12-8-1-永久映射"><a href="#12-8-1-永久映射" class="headerlink" title="12.8.1 永久映射"></a>12.8.1 永久映射</h3><p>映射page到内核地址空间</p><pre><code>void *kmap(struct page *page)</code></pre><p>低端内存：返回虚拟地址</p><p>高端内存：建立永久映射，并返回地址</p><p>kmap可睡眠</p><p>永久映射有限，高端内存不需要时候应该解除映射</p><pre><code>void kunmap(struct page *page)</code></pre><h3 id="12-8-2-临时映射（原子映射）"><a href="#12-8-2-临时映射（原子映射）" class="headerlink" title="12.8.2 临时映射（原子映射）"></a>12.8.2 临时映射（原子映射）</h3><p>创建映射且上下文不能睡眠</p><pre><code>void *kmap_atomic(struct page*page, enum km_type type)</code></pre><p>type描述了临时映射的目的</p><p>不会阻塞</p><p>禁止内核抢占，每个映射对每个处理器唯一</p><pre><code>void kunmap_atomic(void *kvaddr, enum_type type)</code></pre><h2 id="12-9-每个CPU的分配"><a href="#12-9-每个CPU的分配" class="headerlink" title="12.9 每个CPU的分配"></a>12.9 每个CPU的分配</h2><p>每个CPU的数据存在一个数组里</p><p>按当前处理器号决定这个数组的当前元素</p><pre><code>unsigned long my_percpu[NR_CPUS];int cpu;cpu = get_cpu();my_percpu[cpu]++; //具体执行的代码put_cpu();</code></pre><p>不存在并发问题</p><p>内核抢占问题：</p><ul><li>代码被其它处理器抢占，重新调度，CPU变量无效</li><li>同一个处理器抢占了两个，造成竞争</li></ul><p>get_cpu()时禁止内核抢占，put_cpu()时重新激活处理器</p><h2 id="12-10-新的每个CPU接口"><a href="#12-10-新的每个CPU接口" class="headerlink" title="12.10 新的每个CPU接口"></a>12.10 新的每个CPU接口</h2><p>2.6内核为了方便操作每个CPU数据，引入percpu</p><p>&lt;linux/percpu.h&gt;声明了所有接口操作例程</p><h3 id="12-10-1-编译时每个CPU数据"><a href="#12-10-1-编译时每个CPU数据" class="headerlink" title="12.10.1 编译时每个CPU数据"></a>12.10.1 编译时每个CPU数据</h3><pre><code>DEFINE_PER_CPU(type, name);</code></pre><p>为每个处理器创建类型为type，名字为name的变量实例</p><p>在别处声明变量：</p><pre><code>DECLARE_PER_CPU(type, name);</code></pre><p>get_cpu, put_cpu操作变量</p><pre><code>get_cpu_var(name)++;put_cpu_var(name);</code></pre><p>也可以</p><pre><code>per_cpu(name, cpu)++;</code></pre><p>此方法不会禁止内核抢占，也不会提供锁保护</p><p>链接程序将他们创捷在一个唯一的可执行段中.data.percpu</p><h3 id="12-10-2-运行时的每个CPU数据"><a href="#12-10-2-运行时的每个CPU数据" class="headerlink" title="12.10.2 运行时的每个CPU数据"></a>12.10.2 运行时的每个CPU数据</h3><p>内核实现CPU数据动态分配类似kmalloc</p><pre><code>void *alloc_percpu(type);void *__alloc_percpu(size_t size, size_t align);void free_percpu(const void *);</code></pre><p>alloc_percpu:单字节对齐，按照给定类型的自然边界对齐</p><p>__alloc_percpu:指定对齐</p><p>返回一个指针，用来引用CPU数据</p><pre><code>get_cpu_var(ptr);put_cpu_var(prt);</code></pre><h2 id="12-11-使用每个CPU数据的原因"><a href="#12-11-使用每个CPU数据的原因" class="headerlink" title="12.11 使用每个CPU数据的原因"></a>12.11 使用每个CPU数据的原因</h2><ol><li>减少了数据锁定，不再需要锁（纯粹的编程约定，不存在强制措施）</li><li>大大减少缓存失效,percpu接口缓存对齐（cache align）所有数据</li></ol><p>唯一的安全要求：禁止内核抢占（put, get)，不能睡眠</p><h2 id="12-12-分配函数的选择"><a href="#12-12-分配函数的选择" class="headerlink" title="12.12 分配函数的选择"></a>12.12 分配函数的选择</h2><ul><li>常用：kmalloc() GFP_ATOMIC 或 GFP_KERNEL</li><li>高端内存：alloc_pages()+kmap()</li><li>vmalloc():分配大段内存</li><li>slab：针对创建撤销很多大的数据结构</li></ul><h2 id="12-13-小结"><a href="#12-13-小结" class="headerlink" title="12.13 小结"></a>12.13 小结</h2>]]></content>
+      
+      
+      
+        <tags>
+            
+            <tag> study notes </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>2023921</title>
       <link href="/2023/09/21/2023-9-21/"/>
       <url>/2023/09/21/2023-9-21/</url>
