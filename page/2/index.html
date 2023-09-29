@@ -4,13 +4,8 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="keywords" content="2023925, N1co5in3&#39;s Blog">
-    <meta name="description" content="内存管理12.712.7.1中断栈
-12.7.2 栈上正大光明工作尽量动态分配，内核栈有限
-12.8 高端内存的映射12.8.1 永久映射映射page到内核地址空间
-void *kmap(struct page *page)
-
-低端内存：返">
+    <meta name="keywords" content="N1co5in3&#39;s Blog">
+    <meta name="description" content="边缘pwn手，考研中">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -22,7 +17,7 @@ void *kmap(struct page *page)
     <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
-    <title>2023925 | N1co5in3&#39;s Blog</title>
+    <title>N1co5in3&#39;s Blog</title>
     <link rel="icon" type="image/png" href="/favicon.png">
     
 
@@ -48,8 +43,6 @@ void *kmap(struct page *page)
 
 
 
-
-    
 
 
 
@@ -312,458 +305,130 @@ void *kmap(struct page *page)
 </header>
 
     
-
-
-
-<div class="bg-cover pd-header post-cover" style="background-image: url('/images/cover5.jpg')">
-    <div class="container" style="right: 0px;left: 0px;">
-        <div class="row">
-            <div class="col s12 m12 l12">
-                <div class="brand">
-                    <h1 class="description center-align post-title">2023925</h1>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-
-
-<main class="post-container content">
-
-    
+    <div class="bg-cover pd-header about-cover">
+    <div class="container">
     <div class="row">
-    <div id="main-content" class="col s12 m12 l9">
-        <!-- 文章内容详情 -->
-<div id="artDetail">
-    <div class="card">
-        <div class="card-content article-info">
-            <div class="row tag-cate">
-                <div class="col s7">
-                    
-                    <div class="article-tag">
-                        
-                            <a href="/tags/study-notes/">
-                                <span class="chip bg-color">study notes</span>
-                            </a>
-                        
-                    </div>
-                    
-                </div>
-                <div class="col s5 right-align">
-                    
-                </div>
-            </div>
-
-            <div class="post-info">
+    <div class="col s10 offset-s1 m8 offset-m2 l8 offset-l2">
+        <div class="brand">
+            <div class="title center-align">
                 
-                <div class="post-date info-break-policy">
-                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
-                    2023-09-25
-                </div>
-                
-
-                
-
-                
-
-                
-
+                N1co5in3
                 
             </div>
-        </div>
-        <hr class="clearfix">
 
-        
-
-        
-
-        <div class="card-content article-card-content">
-            <div id="articleContent">
-                <h1 id="内存管理"><a href="#内存管理" class="headerlink" title="内存管理"></a>内存管理</h1><h2 id="12-7"><a href="#12-7" class="headerlink" title="12.7"></a>12.7</h2><h3 id="12-7-1"><a href="#12-7-1" class="headerlink" title="12.7.1"></a>12.7.1</h3><p>中断栈</p>
-<h3 id="12-7-2-栈上正大光明工作"><a href="#12-7-2-栈上正大光明工作" class="headerlink" title="12.7.2 栈上正大光明工作"></a>12.7.2 栈上正大光明工作</h3><p>尽量动态分配，内核栈有限</p>
-<h2 id="12-8-高端内存的映射"><a href="#12-8-高端内存的映射" class="headerlink" title="12.8 高端内存的映射"></a>12.8 高端内存的映射</h2><h3 id="12-8-1-永久映射"><a href="#12-8-1-永久映射" class="headerlink" title="12.8.1 永久映射"></a>12.8.1 永久映射</h3><p>映射page到内核地址空间</p>
-<pre><code>void *kmap(struct page *page)
-</code></pre>
-<p>低端内存：返回虚拟地址</p>
-<p>高端内存：建立永久映射，并返回地址</p>
-<p>kmap可睡眠</p>
-<p>永久映射有限，高端内存不需要时候应该解除映射</p>
-<pre><code>void kunmap(struct page *page)
-</code></pre>
-<h3 id="12-8-2-临时映射（原子映射）"><a href="#12-8-2-临时映射（原子映射）" class="headerlink" title="12.8.2 临时映射（原子映射）"></a>12.8.2 临时映射（原子映射）</h3><p>创建映射且上下文不能睡眠</p>
-<pre><code>void *kmap_atomic(struct page*page, enum km_type type)
-</code></pre>
-<p>type描述了临时映射的目的</p>
-<p>不会阻塞</p>
-<p>禁止内核抢占，每个映射对每个处理器唯一</p>
-<pre><code>void kunmap_atomic(void *kvaddr, enum_type type)
-</code></pre>
-<h2 id="12-9-每个CPU的分配"><a href="#12-9-每个CPU的分配" class="headerlink" title="12.9 每个CPU的分配"></a>12.9 每个CPU的分配</h2><p>每个CPU的数据存在一个数组里</p>
-<p>按当前处理器号决定这个数组的当前元素</p>
-<pre><code>unsigned long my_percpu[NR_CPUS];
-
-int cpu;
-cpu = get_cpu();
-my_percpu[cpu]++; //具体执行的代码
-put_cpu();
-</code></pre>
-<p>不存在并发问题</p>
-<p>内核抢占问题：</p>
-<ul>
-<li>代码被其它处理器抢占，重新调度，CPU变量无效</li>
-<li>同一个处理器抢占了两个，造成竞争</li>
-</ul>
-<p>get_cpu()时禁止内核抢占，put_cpu()时重新激活处理器</p>
-<h2 id="12-10-新的每个CPU接口"><a href="#12-10-新的每个CPU接口" class="headerlink" title="12.10 新的每个CPU接口"></a>12.10 新的每个CPU接口</h2><p>2.6内核为了方便操作每个CPU数据，引入percpu</p>
-<p>&lt;linux/percpu.h&gt;声明了所有接口操作例程</p>
-<h3 id="12-10-1-编译时每个CPU数据"><a href="#12-10-1-编译时每个CPU数据" class="headerlink" title="12.10.1 编译时每个CPU数据"></a>12.10.1 编译时每个CPU数据</h3><pre><code>DEFINE_PER_CPU(type, name);
-</code></pre>
-<p>为每个处理器创建类型为type，名字为name的变量实例</p>
-<p>在别处声明变量：</p>
-<pre><code>DECLARE_PER_CPU(type, name);
-</code></pre>
-<p>get_cpu, put_cpu操作变量</p>
-<pre><code>get_cpu_var(name)++;
-put_cpu_var(name);
-</code></pre>
-<p>也可以</p>
-<pre><code>per_cpu(name, cpu)++;
-</code></pre>
-<p>此方法不会禁止内核抢占，也不会提供锁保护</p>
-<p>链接程序将他们创捷在一个唯一的可执行段中.data.percpu</p>
-<h3 id="12-10-2-运行时的每个CPU数据"><a href="#12-10-2-运行时的每个CPU数据" class="headerlink" title="12.10.2 运行时的每个CPU数据"></a>12.10.2 运行时的每个CPU数据</h3><p>内核实现CPU数据动态分配类似kmalloc</p>
-<pre><code>void *alloc_percpu(type);
-void *__alloc_percpu(size_t size, size_t align);
-void free_percpu(const void *);
-</code></pre>
-<p>alloc_percpu:单字节对齐，按照给定类型的自然边界对齐</p>
-<p>__alloc_percpu:指定对齐</p>
-<p>返回一个指针，用来引用CPU数据</p>
-<pre><code>get_cpu_var(ptr);
-put_cpu_var(prt);
-</code></pre>
-<h2 id="12-11-使用每个CPU数据的原因"><a href="#12-11-使用每个CPU数据的原因" class="headerlink" title="12.11 使用每个CPU数据的原因"></a>12.11 使用每个CPU数据的原因</h2><ol>
-<li>减少了数据锁定，不再需要锁（纯粹的编程约定，不存在强制措施）</li>
-<li>大大减少缓存失效,percpu接口缓存对齐（cache align）所有数据</li>
-</ol>
-<p>唯一的安全要求：禁止内核抢占（put, get)，不能睡眠</p>
-<h2 id="12-12-分配函数的选择"><a href="#12-12-分配函数的选择" class="headerlink" title="12.12 分配函数的选择"></a>12.12 分配函数的选择</h2><ul>
-<li>常用：kmalloc() GFP_ATOMIC 或 GFP_KERNEL</li>
-<li>高端内存：alloc_pages()+kmap()</li>
-<li>vmalloc():分配大段内存</li>
-<li>slab：针对创建撤销很多大的数据结构</li>
-</ul>
-<h2 id="12-13-小结"><a href="#12-13-小结" class="headerlink" title="12.13 小结"></a>12.13 小结</h2>
+            <div class="description center-align">
                 
-            </div>
-            <hr/>
-
-            
-
-    <div class="reprint" id="reprint-statement">
-        
-            <div class="reprint__author">
-                <span class="reprint-meta" style="font-weight: bold;">
-                    <i class="fas fa-user">
-                        文章作者:
-                    </i>
-                </span>
-                <span class="reprint-info">
-                    <a href="/about" rel="external nofollow noreferrer">N1co5in3</a>
-                </span>
-            </div>
-            <div class="reprint__type">
-                <span class="reprint-meta" style="font-weight: bold;">
-                    <i class="fas fa-link">
-                        文章链接:
-                    </i>
-                </span>
-                <span class="reprint-info">
-                    <a href="http://N1co3tine.github.io/2023/09/25/2023-9-25/">http://N1co3tine.github.io/2023/09/25/2023-9-25/</a>
-                </span>
-            </div>
-            <div class="reprint__notice">
-                <span class="reprint-meta" style="font-weight: bold;">
-                    <i class="fas fa-copyright">
-                        版权声明:
-                    </i>
-                </span>
-                <span class="reprint-info">
-                    本博客所有文章除特別声明外，均采用
-                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
-                    许可协议。转载请注明来源
-                    <a href="/about" target="_blank">N1co5in3</a>
-                    !
-                </span>
-            </div>
-        
-    </div>
-
-    <script async defer>
-      document.addEventListener("copy", function (e) {
-        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
-        M.toast({html: toastHTML})
-      });
-
-      function navToReprintStatement() {
-        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
-      }
-    </script>
-
-
-
-            <div class="tag_share" style="display: block;">
-                <div class="post-meta__tag-list" style="display: inline-block;">
-                    
-                        <div class="article-tag">
+                <span id="subtitle"></span>
+                <script src="/libs/typed/typed.js"></script>
+                <script>
+                    var typed = new Typed("#subtitle", {
+                        strings: [ 
                             
-                                <a href="/tags/study-notes/">
-                                    <span class="chip bg-color">study notes</span>
-                                </a>
+                                "在有意义的痛苦中成长",
                             
-                        </div>
-                    
-                </div>
-                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
-                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
-<div id="article-share">
-
-    
-    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
-    <script src="/libs/share/js/social-share.min.js"></script>
-    
-
-    
-
-</div>
-
-                </div>
-            </div>
-            
-        </div>
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-<article id="prenext-posts" class="prev-next articles">
-    <div class="row article-row">
-        
-        <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge left-badge text-color">
-                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
-            <div class="card">
-                <a href="/2023/09/30/2023-9-30/">
-                    <div class="card-image">
-                        
-                        <img src="/images/cover6.jpg" class="responsive-img" alt="2023930">
-                        
-                        <span class="card-title">2023930</span>
-                    </div>
-                </a>
-                <div class="card-content article-content">
-                    <div class="summary block-with-text">
-                        
+                                "Grow in meaningful bitterness",
                             
-                        
-                    </div>
-                    <div class="publish-info">
-                        <span class="publish-date">
-                            <i class="far fa-clock fa-fw icon-date"></i>2023-09-30
-                        </span>
-                        <span class="publish-author">
-                            
-                            <i class="fas fa-user fa-fw"></i>
-                            N1co5in3
-                            
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="card-action article-tags">
-                    
-                    <a href="/tags/study-notes/">
-                        <span class="chip bg-color">study notes</span>
-                    </a>
-                    
-                </div>
+                        ],
+                        startDelay: 300,
+                        typeSpeed: 100,
+                        loop: true,
+                        backSpeed: 50,
+                        showCursor: true
+                    });
+                </script>
                 
             </div>
-        </div>
-        
-        
-        <div class="article col s12 m6" data-aos="fade-up">
-            <div class="article-badge right-badge text-color">
-                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
-            </div>
-            <div class="card">
-                <a href="/2023/09/21/2023-9-21/">
-                    <div class="card-image">
-                        
-                        <img src="/images/cover4.jpg" class="responsive-img" alt="2023921">
-                        
-                        <span class="card-title">2023921</span>
-                    </div>
-                </a>
-                <div class="card-content article-content">
-                    <div class="summary block-with-text">
-                        
-                            
-                        
-                    </div>
-                    <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2023-09-21
-                            </span>
-                        <span class="publish-author">
-                            
-                            <i class="fas fa-user fa-fw"></i>
-                            N1co5in3
-                            
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="card-action article-tags">
-                    
-                    <a href="/tags/study-notes/">
-                        <span class="chip bg-color">study notes</span>
-                    </a>
-                    
-                </div>
-                
-            </div>
-        </div>
-        
-    </div>
-</article>
-
-</div>
-
-
-
-<!-- 代码块功能依赖 -->
-<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
-
-
-
-<!-- 代码语言 -->
-
-<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
-
-
-<!-- 代码块复制 -->
-
-<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
-
-
-<!-- 代码块收缩 -->
-
-<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
-
-
-
-    </div>
-    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
-        <div class="toc-widget card" style="background-color: white;">
-            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
-            <div id="toc-content"></div>
         </div>
     </div>
 </div>
 
-<!-- TOC 悬浮按钮. -->
 
-<div id="floating-toc-btn" class="hide-on-med-and-down">
-    <a class="btn-floating btn-large bg-color">
-        <i class="fas fa-list-ul"></i>
-    </a>
-</div>
-
-
-<script src="/libs/tocbot/tocbot.min.js"></script>
 <script>
-    $(function () {
-        tocbot.init({
-            tocSelector: '#toc-content',
-            contentSelector: '#articleContent',
-            headingsOffset: -($(window).height() * 0.4 - 45),
-            collapseDepth: Number('0'),
-            headingSelector: 'h2, h3, h4'
-        });
-
-        // Set scroll toc fixed.
-        let tocHeight = parseInt($(window).height() * 0.4 - 64);
-        let $tocWidget = $('.toc-widget');
-        $(window).scroll(function () {
-            let scroll = $(window).scrollTop();
-            /* add post toc fixed. */
-            if (scroll > tocHeight) {
-                $tocWidget.addClass('toc-fixed');
-            } else {
-                $tocWidget.removeClass('toc-fixed');
-            }
-        });
-
-        
-        /* 修复文章卡片 div 的宽度. */
-        let fixPostCardWidth = function (srcId, targetId) {
-            let srcDiv = $('#' + srcId);
-            if (srcDiv.length === 0) {
-                return;
-            }
-
-            let w = srcDiv.width();
-            if (w >= 450) {
-                w = w + 21;
-            } else if (w >= 350 && w < 450) {
-                w = w + 18;
-            } else if (w >= 300 && w < 350) {
-                w = w + 16;
-            } else {
-                w = w + 14;
-            }
-            $('#' + targetId).width(w);
-        };
-
-        // 切换TOC目录展开收缩的相关操作.
-        const expandedClass = 'expanded';
-        let $tocAside = $('#toc-aside');
-        let $mainContent = $('#main-content');
-        $('#floating-toc-btn .btn-floating').click(function () {
-            if ($tocAside.hasClass(expandedClass)) {
-                $tocAside.removeClass(expandedClass).hide();
-                $mainContent.removeClass('l9');
-            } else {
-                $tocAside.addClass(expandedClass).show();
-                $mainContent.addClass('l9');
-            }
-            fixPostCardWidth('artDetail', 'prenext-posts');
-        });
-        
-    });
+    // 每天切换 banner 图.  Switch banner image every day.
+    var bannerUrl = "/medias/banner/" + new Date().getDay() + '.jpg';
+    $('.bg-cover').css('background-image', 'url(' + bannerUrl + ')');
 </script>
 
+
+    </div>
+</div>
+
+
+<main class="content">
+
     
 
+    
+
+    <!-- 所有文章卡片 -->
+    <article id="articles" class="container articles">
+        <div class="row article-row">
+            
+             <!-- 隐藏某个文章 -->
+            <div class="article col s12 m6 l4" data-aos="zoom-in">
+                <div class="card">
+                    <a href="/2022/04/14/hello-world/">
+                        <div class="card-image">
+                            
+                            
+                            <img src="/medias/featureimages/12.jpg" class="responsive-img" alt="Hello World">
+                            
+                            <span class="card-title">Hello World</span>
+                        </div>
+                    </a>
+
+                    <div class="card-content article-content">
+                        <div class="summary block-with-text">
+                            
+                                Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hex
+                            
+                        </div>
+                        <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2022-04-14
+                            </span>
+                            <span class="publish-author">
+                                
+                                <i class="fas fa-user fa-fw"></i>
+                                N1co5in3
+                                
+                            </span>
+                        </div>
+                    </div>
+
+                    
+                </div>
+            </div>
+              <!-- 隐藏某个文章 -->
+            
+        </div>
+    </article>
+
 </main>
+
+
+<div class="container paging">
+    <div class="row">
+        <div class="col s6 m4 l4">
+            
+            <a href="/"
+               class="left btn-floating btn-large waves-effect waves-light bg-color">
+                <i class="fas fa-angle-left"></i>
+            </a>
+            
+        </div>
+        <div class="page-info col m4 l4 hide-on-small-only">
+            <div class="center-align b-text-gray">2 / 2</div>
+        </div>
+        <div class="col s6 m4 l4">
+            
+            <a class="right btn-floating btn-large disabled">
+                <i class="fas fa-angle-right"></i>
+            </a>
+            
+        </div>
+    </div>
+</div>
 
 
 

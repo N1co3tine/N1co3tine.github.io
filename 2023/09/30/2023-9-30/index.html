@@ -4,13 +4,12 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="keywords" content="2023925, N1co5in3&#39;s Blog">
-    <meta name="description" content="内存管理12.712.7.1中断栈
-12.7.2 栈上正大光明工作尽量动态分配，内核栈有限
-12.8 高端内存的映射12.8.1 永久映射映射page到内核地址空间
-void *kmap(struct page *page)
-
-低端内存：返">
+    <meta name="keywords" content="2023930, N1co5in3&#39;s Blog">
+    <meta name="description" content="虚拟文件系统VFS作为内核的子系统
+所有FS不但以来VFS共存，也依靠VFS协同工作
+不同FS，甚至不同介质的FS可进行读写工作
+13.1 通用文件系统接口13.2 文件系统抽象层通用文件系统模型：囊括了任何文件系统的常用功能集
+可支持多种">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -22,7 +21,7 @@ void *kmap(struct page *page)
     <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
-    <title>2023925 | N1co5in3&#39;s Blog</title>
+    <title>2023930 | N1co5in3&#39;s Blog</title>
     <link rel="icon" type="image/png" href="/favicon.png">
     
 
@@ -315,12 +314,12 @@ void *kmap(struct page *page)
 
 
 
-<div class="bg-cover pd-header post-cover" style="background-image: url('/images/cover5.jpg')">
+<div class="bg-cover pd-header post-cover" style="background-image: url('/images/cover6.jpg')">
     <div class="container" style="right: 0px;left: 0px;">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
-                    <h1 class="description center-align post-title">2023925</h1>
+                    <h1 class="description center-align post-title">2023930</h1>
                 </div>
             </div>
         </div>
@@ -360,7 +359,7 @@ void *kmap(struct page *page)
                 
                 <div class="post-date info-break-policy">
                     <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
-                    2023-09-25
+                    2023-09-30
                 </div>
                 
 
@@ -381,81 +380,187 @@ void *kmap(struct page *page)
 
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h1 id="内存管理"><a href="#内存管理" class="headerlink" title="内存管理"></a>内存管理</h1><h2 id="12-7"><a href="#12-7" class="headerlink" title="12.7"></a>12.7</h2><h3 id="12-7-1"><a href="#12-7-1" class="headerlink" title="12.7.1"></a>12.7.1</h3><p>中断栈</p>
-<h3 id="12-7-2-栈上正大光明工作"><a href="#12-7-2-栈上正大光明工作" class="headerlink" title="12.7.2 栈上正大光明工作"></a>12.7.2 栈上正大光明工作</h3><p>尽量动态分配，内核栈有限</p>
-<h2 id="12-8-高端内存的映射"><a href="#12-8-高端内存的映射" class="headerlink" title="12.8 高端内存的映射"></a>12.8 高端内存的映射</h2><h3 id="12-8-1-永久映射"><a href="#12-8-1-永久映射" class="headerlink" title="12.8.1 永久映射"></a>12.8.1 永久映射</h3><p>映射page到内核地址空间</p>
-<pre><code>void *kmap(struct page *page)
-</code></pre>
-<p>低端内存：返回虚拟地址</p>
-<p>高端内存：建立永久映射，并返回地址</p>
-<p>kmap可睡眠</p>
-<p>永久映射有限，高端内存不需要时候应该解除映射</p>
-<pre><code>void kunmap(struct page *page)
-</code></pre>
-<h3 id="12-8-2-临时映射（原子映射）"><a href="#12-8-2-临时映射（原子映射）" class="headerlink" title="12.8.2 临时映射（原子映射）"></a>12.8.2 临时映射（原子映射）</h3><p>创建映射且上下文不能睡眠</p>
-<pre><code>void *kmap_atomic(struct page*page, enum km_type type)
-</code></pre>
-<p>type描述了临时映射的目的</p>
-<p>不会阻塞</p>
-<p>禁止内核抢占，每个映射对每个处理器唯一</p>
-<pre><code>void kunmap_atomic(void *kvaddr, enum_type type)
-</code></pre>
-<h2 id="12-9-每个CPU的分配"><a href="#12-9-每个CPU的分配" class="headerlink" title="12.9 每个CPU的分配"></a>12.9 每个CPU的分配</h2><p>每个CPU的数据存在一个数组里</p>
-<p>按当前处理器号决定这个数组的当前元素</p>
-<pre><code>unsigned long my_percpu[NR_CPUS];
-
-int cpu;
-cpu = get_cpu();
-my_percpu[cpu]++; //具体执行的代码
-put_cpu();
-</code></pre>
-<p>不存在并发问题</p>
-<p>内核抢占问题：</p>
+                <h1 id="虚拟文件系统"><a href="#虚拟文件系统" class="headerlink" title="虚拟文件系统"></a>虚拟文件系统</h1><p>VFS作为内核的子系统</p>
+<p>所有FS不但以来VFS共存，也依靠VFS协同工作</p>
+<p>不同FS，甚至不同介质的FS可进行读写工作</p>
+<h2 id="13-1-通用文件系统接口"><a href="#13-1-通用文件系统接口" class="headerlink" title="13.1 通用文件系统接口"></a>13.1 通用文件系统接口</h2><h2 id="13-2-文件系统抽象层"><a href="#13-2-文件系统抽象层" class="headerlink" title="13.2 文件系统抽象层"></a>13.2 文件系统抽象层</h2><p>通用文件系统模型：囊括了任何文件系统的常用功能集</p>
+<p>可支持多种差异很大的FS，从DOS系统的FAT到windows的NTFS</p>
+<p>一方面，系统调用时通用VFS接口，提供给用户空间的前端</p>
+<p>另一方面，系统调用是具体文件系统的后端</p>
+<p>userspace -&gt; VFS -&gt; FS -&gt; 物理介质</p>
+<h3 id="13-3-Unix文件系统"><a href="#13-3-Unix文件系统" class="headerlink" title="13.3 Unix文件系统"></a>13.3 Unix文件系统</h3><p>非unix风格的FS，必须经过封装，得到符合unix概念的接口（文件，目录项，inode，挂载点）</p>
+<h3 id="13-4-VFS对象及其数据结构"><a href="#13-4-VFS对象及其数据结构" class="headerlink" title="13.4 VFS对象及其数据结构"></a>13.4 VFS对象及其数据结构</h3><p>VFS的主要对象：</p>
 <ul>
-<li>代码被其它处理器抢占，重新调度，CPU变量无效</li>
-<li>同一个处理器抢占了两个，造成竞争</li>
+<li>超级块，代表一个具体的FS</li>
+<li>索引节点对象，代表一个具体文件</li>
+<li>目录项对象，代表目录项，是路径的组成部分（目录或文件）</li>
+<li>文件对象</li>
 </ul>
-<p>get_cpu()时禁止内核抢占，put_cpu()时重新激活处理器</p>
-<h2 id="12-10-新的每个CPU接口"><a href="#12-10-新的每个CPU接口" class="headerlink" title="12.10 新的每个CPU接口"></a>12.10 新的每个CPU接口</h2><p>2.6内核为了方便操作每个CPU数据，引入percpu</p>
-<p>&lt;linux/percpu.h&gt;声明了所有接口操作例程</p>
-<h3 id="12-10-1-编译时每个CPU数据"><a href="#12-10-1-编译时每个CPU数据" class="headerlink" title="12.10.1 编译时每个CPU数据"></a>12.10.1 编译时每个CPU数据</h3><pre><code>DEFINE_PER_CPU(type, name);
-</code></pre>
-<p>为每个处理器创建类型为type，名字为name的变量实例</p>
-<p>在别处声明变量：</p>
-<pre><code>DECLARE_PER_CPU(type, name);
-</code></pre>
-<p>get_cpu, put_cpu操作变量</p>
-<pre><code>get_cpu_var(name)++;
-put_cpu_var(name);
-</code></pre>
-<p>也可以</p>
-<pre><code>per_cpu(name, cpu)++;
-</code></pre>
-<p>此方法不会禁止内核抢占，也不会提供锁保护</p>
-<p>链接程序将他们创捷在一个唯一的可执行段中.data.percpu</p>
-<h3 id="12-10-2-运行时的每个CPU数据"><a href="#12-10-2-运行时的每个CPU数据" class="headerlink" title="12.10.2 运行时的每个CPU数据"></a>12.10.2 运行时的每个CPU数据</h3><p>内核实现CPU数据动态分配类似kmalloc</p>
-<pre><code>void *alloc_percpu(type);
-void *__alloc_percpu(size_t size, size_t align);
-void free_percpu(const void *);
-</code></pre>
-<p>alloc_percpu:单字节对齐，按照给定类型的自然边界对齐</p>
-<p>__alloc_percpu:指定对齐</p>
-<p>返回一个指针，用来引用CPU数据</p>
-<pre><code>get_cpu_var(ptr);
-put_cpu_var(prt);
-</code></pre>
-<h2 id="12-11-使用每个CPU数据的原因"><a href="#12-11-使用每个CPU数据的原因" class="headerlink" title="12.11 使用每个CPU数据的原因"></a>12.11 使用每个CPU数据的原因</h2><ol>
-<li>减少了数据锁定，不再需要锁（纯粹的编程约定，不存在强制措施）</li>
-<li>大大减少缓存失效,percpu接口缓存对齐（cache align）所有数据</li>
-</ol>
-<p>唯一的安全要求：禁止内核抢占（put, get)，不能睡眠</p>
-<h2 id="12-12-分配函数的选择"><a href="#12-12-分配函数的选择" class="headerlink" title="12.12 分配函数的选择"></a>12.12 分配函数的选择</h2><ul>
-<li>常用：kmalloc() GFP_ATOMIC 或 GFP_KERNEL</li>
-<li>高端内存：alloc_pages()+kmap()</li>
-<li>vmalloc():分配大段内存</li>
-<li>slab：针对创建撤销很多大的数据结构</li>
+<p>每个主要对象，包括一个操作对象，描述了内核对主要对象可以使用的方法</p>
+<ul>
+<li>super_operations对象，对文件系统，如write_inode()和sync_fs()</li>
+<li>inode_operations,create()和link（）</li>
+<li>dentry_operations, d_compare() and d_delete()</li>
+<li>file_operations, read() and write()</li>
 </ul>
-<h2 id="12-13-小结"><a href="#12-13-小结" class="headerlink" title="12.13 小结"></a>12.13 小结</h2>
+<p>操作对象作为一个结构体指针实现（类比IO_FILE)</p>
+<p>除此之外：</p>
+<ul>
+<li>注册的文件系统用file_system_type结构体</li>
+<li>安装点用vfsmount结构体</li>
+<li>fs_struct</li>
+<li>file</li>
+</ul>
+<h2 id="13-5-超级块对象"><a href="#13-5-超级块对象" class="headerlink" title="13.5 超级块对象"></a>13.5 超级块对象</h2><p>通常为磁盘超级快；对于内存文件系统，会现场创建超级块保存在内存</p>
+<p>super_block结构体定义在文件&lt;linux/fs.h&gt;</p>
+<h2 id="13-6-超级快操作"><a href="#13-6-超级快操作" class="headerlink" title="13.6 超级快操作"></a>13.6 超级快操作</h2><p>最重要的s_op，操作函数表，定义在文件&lt;linux/fs.h&gt;</p>
+<p>文件系统需要执行超级快操作时，需要在超级快对象中，找需要的操作方法，如写自己的超级快：</p>
+<pre><code>sb-&gt;s_op-&gt;write_super(sb);
+</code></pre>
+<p>sb:super block指针，找op再找write</p>
+<p>尽管函数来自超级快，调用时还是要把超级快作为参数传递</p>
+<p>如果c++只需要</p>
+<p>sb.write_super();</p>
+<pre><code>//创建初始化新的索引节点
+struct inode* alloc_inode(struct super_block *sb)
+//释放给定的索引节点
+void destroy_inode(struct inode* inode)
+//索引节点脏时调用，日志文件系统执行函数，更新日志
+void dirty_inode(struct inode* inode)
+//索引节点写入磁盘，wait表示写操作是否需要同步
+void write_inode(struct inode *inode, int wait)
+//最后一个引用消失，VFS调用删除inode
+void drop_inode(struct inode *inode)
+void delete_inode(struct inode *inode)
+//卸载文件系统时释放超级快，调用者必须持有s_lock
+void put_super(struct super_block *sb)
+//用给定的超级快更新磁盘的超级快
+void write_super(struct super_block *sb)
+//文件系统的数据元与磁盘上的fs同步
+int sync_fs(struct super_block *sb, int wait)
+//禁止对文件系统改变，再用超级快更新磁盘超级快，LVM(逻辑卷标管理)使用
+void write_super_lockfs(struct super_block *sb)
+//重新安装文件系统
+int remount_fs(struct super_block *sb,int *flag, char* data)
+//释放inode+清空
+void clear_inode(struct inode *inode)
+//中断安装操作,网络文件系统如NFS使用
+void umount_begin(struct super_block *sb)
+</code></pre>
+<p>除了dirty_inode都可以阻塞</p>
+<p>如果操作函数指针为NULL，调用通用函数执行操作</p>
+<h2 id="13-7-索引节点对象"><a href="#13-7-索引节点对象" class="headerlink" title="13.7 索引节点对象"></a>13.7 索引节点对象</h2><p>索引节点：内核操作文件或目录时需要的全部信息</p>
+<p>Unix风格FS直接读取</p>
+<p>其它需要提取inode相关信息</p>
+<h2 id="13-8-索引节点操作"><a href="#13-8-索引节点操作" class="headerlink" title="13.8 索引节点操作"></a>13.8 索引节点操作</h2><p>调用方式</p>
+<pre><code>i-&gt;i_op-&gt;truncate(i)
+</code></pre>
+<p>这些函数可能VFS执行，也可能具体文件系统执行</p>
+<pre><code>//为dentry创建新的索引节点，mode设置初始模式
+int create(struct inode*dir, struct dentry*dentry, int mode)
+//目录中寻找索引节点
+struct dentry loookup(struct inode *dir, struct dentry *dentry)
+//link()调用，创建硬连接
+int link(struct dentry *old_dentry, struct inode *dir, struct dentry *dentry)
+//unlink()调用，删除dentry指定的inode
+int unlink(struct inode *dir, struct dentry *dentry)
+//symlink调用，创建软连接
+int unlink(struct inode *dir, struct dentry *dentry， const char *symname)
+//mknod调用，创建特殊文件。创建的文件放在dir，目录项dentry，关联的设备rdev
+int mknod(struct inode *dir, struct dentry *dentry, int mode, dev_t rdev)
+//readlink()调用，拷贝数据到特定的buffer
+int readlink(struct dentry *dentry, char *buffer, int buflen)
+//从符号链接查找索引节点，由dentry解析，结果存放在nd指向的nameidata结构体中
+int follow_link(struct dentry *dentry, struct nameidata *nd)
+//清除follow_link
+int put_link(struct dentry *dentry, struct nameidata *nd)
+//修改文件的大小
+void truncate(struct inode* inode)
+//检查inode所代表的文件是否允许特定访问模式
+int permission(struct inode* inode, int mask)
+</code></pre>
+<h2 id="13-9-目录项对象"><a href="#13-9-目录项对象" class="headerlink" title="13.9 目录项对象"></a>13.9 目录项对象</h2><p>每个dentry代表路径中的一个特定部分</p>
+<p>常规的字符串比较，执行耗时，代码繁琐</p>
+<p>目录项对象的引入使得过程更简单</p>
+<h3 id="13-9-1-目录项状态"><a href="#13-9-1-目录项状态" class="headerlink" title="13.9.1 目录项状态"></a>13.9.1 目录项状态</h3><p>三种状态：被使用，未被使用和负状态</p>
+<p>被使用：对应一个有效的索引节点，有一个多个使用者</p>
+<p>被使用不能被丢弃</p>
+<p>未被使用：d_count为0</p>
+<p>负状态：没有对应节点（NULL），用于确认路径不存在</p>
+<h3 id="13-9-2-目录项缓存"><a href="#13-9-2-目录项缓存" class="headerlink" title="13.9.2 目录项缓存"></a>13.9.2 目录项缓存</h3><p>将元素逐个解析为目录项，浪费时间</p>
+<p>将目录项对象缓存在dcache中</p>
+<p>三个主要部分：</p>
+<p>被使用的目录项链表</p>
+<p>最近被使用的双向链表：包含未被使用的，负状态的</p>
+<p>散列表，相应的散列函数</p>
+<p>散列表由数组dentry_hashtable表示， 元素为指向相同键值的目录项对象链表的指针</p>
+<p>实际的散列值由d_hash函数计算：内核给FS唯一的散列函数</p>
+<h2 id="13-10-目录项操作"><a href="#13-10-目录项操作" class="headerlink" title="13.10 目录项操作"></a>13.10 目录项操作</h2><pre><code>//比较文件名是否相同，对于FAT不区分大小写
+int d_compare(struct dentry *dentry, struct qstr *name1, struct qstr* name2)
+</code></pre>
+<h2 id="13-11-文件对象"><a href="#13-11-文件对象" class="headerlink" title="13.11 文件对象"></a>13.11 文件对象</h2><p>文件对象在进程观点上，代表打开文件</p>
+<p>OS视角上目录项对象代表打开文件，inode和目录项对象是唯一的</p>
+<p>记录文件是否脏是索引节点记录的</p>
+<h2 id="13-12-文件操作"><a href="#13-12-文件操作" class="headerlink" title="13.12 文件操作"></a>13.12 文件操作</h2><p>对不感兴趣的操作可置为NULL，通用操作</p>
+<pre><code>//更新偏移量指针
+loff_t lleek(struct file *file, loff_t offset, int origin)
+//从offset读取count字节到buf，更新文件指针
+ssize_t read(struct file *file, char *buf, size_t count, loff_t offset)
+//从iocb描述的文件里，同步方式读取count字节到buf。
+ssize_t aio_read(struct kiocb *iocb, char *buf, size_t count, loff_t offset)
+//返回目录列表中的下一个目录
+int readdir(struct file *file, struct poll_table_struct *poll_table)
+//所有被缓存数据写回磁盘
+int fsync(struct file *file, struct dentry *dentry, int datasync)
+//打开或关闭异步IO的通告信号
+int fasync(int fd, struct file*file, int on)
+//从一个文件拷贝数据到另一个文件，全部在内核完成，避免了向用户不必要的拷贝
+ssize_t sendfile(struct file*file, loff_t *offset,size_t size, read_actor_t actor, void *target)
+//提供忠告锁
+int flock(struct file *flip, int cmd, struct file_lock *fl)
+</code></pre>
+<h2 id="13-13-和文件系统相关的数据结构"><a href="#13-13-和文件系统相关的数据结构" class="headerlink" title="13.13 和文件系统相关的数据结构"></a>13.13 和文件系统相关的数据结构</h2><h4 id="file-system-type"><a href="#file-system-type" class="headerlink" title="file_system_type"></a>file_system_type</h4><p>描述各种FS类型</p>
+<h4 id="vfsmount"><a href="#vfsmount" class="headerlink" title="vfsmount"></a>vfsmount</h4><p>描述一个FS的实例</p>
+<p>理清文件系统和其它安装点的关系，是最复杂的工作</p>
+<p>vsmount中的各种链表，用于跟踪相关信息</p>
+<p>标准安装标志列表</p>
+<table>
+<thead>
+<tr>
+<th>标志</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>MNT_NOSUID</td>
+<td>禁止exe设置setuid,setgid标志</td>
+</tr>
+<tr>
+<td>MNT_MODEV</td>
+<td>禁止访问该FS上的设备文件</td>
+</tr>
+<tr>
+<td>MNT_NOEXEC</td>
+<td>禁止执行FS上的exe</td>
+</tr>
+</tbody></table>
+<h2 id="13-14-进程相关数据结构"><a href="#13-14-进程相关数据结构" class="headerlink" title="13.14 进程相关数据结构"></a>13.14 进程相关数据结构</h2><p>每个进程都有一组自己打开的文件</p>
+<h4 id="files-struct"><a href="#files-struct" class="headerlink" title="files_struct"></a>files_struct</h4><pre><code>struct files_struct
+&#123;
+    atomic_t count;
+    ...
+    struct file *fd_array[NR_OPEN_DEFAULT];
+&#125;
+</code></pre>
+<p>可容纳64个文件对象</p>
+<p>若超过64，分配一个新数组</p>
+<p>可以适当增大NR_OPEN_DEFAULT的预定义</p>
+<p>count:可以让多个进程共享结构体，计数防止撤销</p>
+<h4 id="fs-struct"><a href="#fs-struct" class="headerlink" title="fs_struct"></a>fs_struct</h4><p>包括文件系统和进程的相关信息</p>
+<h4 id="mmt-namespace"><a href="#mmt-namespace" class="headerlink" title="mmt_namespace"></a>mmt_namespace</h4><p>单进程命名空间</p>
+<p>每一个进程在系统中都看到为一个安装文件系统</p>
+<p>默认情况，所有进程共享同样的命名空间</p>
+<h2 id="13-15-小结"><a href="#13-15-小结" class="headerlink" title="13.15 小结"></a>13.15 小结</h2>
                 
             </div>
             <hr/>
@@ -481,7 +586,7 @@ put_cpu_var(prt);
                     </i>
                 </span>
                 <span class="reprint-info">
-                    <a href="http://N1co3tine.github.io/2023/09/25/2023-9-25/">http://N1co3tine.github.io/2023/09/25/2023-9-25/</a>
+                    <a href="http://N1co3tine.github.io/2023/09/30/2023-9-30/">http://N1co3tine.github.io/2023/09/30/2023-9-30/</a>
                 </span>
             </div>
             <div class="reprint__notice">
@@ -566,9 +671,10 @@ put_cpu_var(prt);
 <article id="prenext-posts" class="prev-next articles">
     <div class="row article-row">
         
-        <div class="article col s12 m6" data-aos="fade-up">
+        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
             <div class="article-badge left-badge text-color">
-                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+                <i class="far fa-dot-circle"></i>&nbsp;本篇
+            </div>
             <div class="card">
                 <a href="/2023/09/30/2023-9-30/">
                     <div class="card-image">
@@ -585,9 +691,9 @@ put_cpu_var(prt);
                         
                     </div>
                     <div class="publish-info">
-                        <span class="publish-date">
-                            <i class="far fa-clock fa-fw icon-date"></i>2023-09-30
-                        </span>
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2023-09-30
+                            </span>
                         <span class="publish-author">
                             
                             <i class="fas fa-user fa-fw"></i>
@@ -596,6 +702,7 @@ put_cpu_var(prt);
                         </span>
                     </div>
                 </div>
+
                 
                 <div class="card-action article-tags">
                     
@@ -614,12 +721,12 @@ put_cpu_var(prt);
                 下一篇&nbsp;<i class="fas fa-chevron-right"></i>
             </div>
             <div class="card">
-                <a href="/2023/09/21/2023-9-21/">
+                <a href="/2023/09/25/2023-9-25/">
                     <div class="card-image">
                         
-                        <img src="/images/cover4.jpg" class="responsive-img" alt="2023921">
+                        <img src="/images/cover5.jpg" class="responsive-img" alt="2023925">
                         
-                        <span class="card-title">2023921</span>
+                        <span class="card-title">2023925</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
@@ -630,7 +737,7 @@ put_cpu_var(prt);
                     </div>
                     <div class="publish-info">
                             <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2023-09-21
+                                <i class="far fa-clock fa-fw icon-date"></i>2023-09-25
                             </span>
                         <span class="publish-author">
                             
