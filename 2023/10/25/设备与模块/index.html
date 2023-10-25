@@ -4,15 +4,14 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="keywords" content="页高速缓存和页回写, N1co5in3&#39;s Blog">
-    <meta name="description" content="the Page Cache and Page Writebackpage cache: 磁盘cache,减少磁盘IO
-page writeback: page cache回写到disk
-disk cache的重要性
-
-提速
-局部性原理
-
-">
+    <meta name="keywords" content="设备与模块, N1co5in3&#39;s Blog">
+    <meta name="description" content="设备与模块设备类型：unix系统为了统一常见设备，设定的类型
+模块
+内核对象
+sysfs：表示设备树的文件系统
+设备类型块设备blkdevs字符设备cdevs网络设备也称以太网设备，提供对网络的访问
+物理适配器+特定的协议
+打破了unix ">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -24,7 +23,7 @@ disk cache的重要性
     <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
-    <title>页高速缓存和页回写 | N1co5in3&#39;s Blog</title>
+    <title>设备与模块 | N1co5in3&#39;s Blog</title>
     <link rel="icon" type="image/png" href="/favicon.png">
     
 
@@ -317,12 +316,12 @@ disk cache的重要性
 
 
 
-<div class="bg-cover pd-header post-cover" style="background-image: url('/images/cover9.jpg')">
+<div class="bg-cover pd-header post-cover" style="background-image: url('/images/cover10.jpg')">
     <div class="container" style="right: 0px;left: 0px;">
         <div class="row">
             <div class="col s12 m12 l12">
                 <div class="brand">
-                    <h1 class="description center-align post-title">页高速缓存和页回写</h1>
+                    <h1 class="description center-align post-title">设备与模块</h1>
                 </div>
             </div>
         </div>
@@ -362,7 +361,7 @@ disk cache的重要性
                 
                 <div class="post-date info-break-policy">
                     <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
-                    2023-10-11
+                    2023-10-25
                 </div>
                 
 
@@ -383,128 +382,160 @@ disk cache的重要性
 
         <div class="card-content article-card-content">
             <div id="articleContent">
-                <h1 id="the-Page-Cache-and-Page-Writeback"><a href="#the-Page-Cache-and-Page-Writeback" class="headerlink" title="the Page Cache and Page Writeback"></a>the Page Cache and Page Writeback</h1><p>page cache: 磁盘cache,减少磁盘IO</p>
-<p>page writeback: page cache回写到disk</p>
-<p>disk cache的重要性</p>
+                <h1 id="设备与模块"><a href="#设备与模块" class="headerlink" title="设备与模块"></a>设备与模块</h1><p>设备类型：unix系统为了统一常见设备，设定的类型</p>
+<p>模块</p>
+<p>内核对象</p>
+<p>sysfs：表示设备树的文件系统</p>
+<h2 id="设备类型"><a href="#设备类型" class="headerlink" title="设备类型"></a>设备类型</h2><h3 id="块设备blkdevs"><a href="#块设备blkdevs" class="headerlink" title="块设备blkdevs"></a>块设备blkdevs</h3><h3 id="字符设备cdevs"><a href="#字符设备cdevs" class="headerlink" title="字符设备cdevs"></a>字符设备cdevs</h3><h3 id="网络设备"><a href="#网络设备" class="headerlink" title="网络设备"></a>网络设备</h3><p>也称以太网设备，提供对网络的访问</p>
+<p>物理适配器+特定的协议</p>
+<p>打破了unix 一切皆文件的设计原则</p>
+<p>通过socket api访问</p>
+<h3 id="杂项设备miscdevs"><a href="#杂项设备miscdevs" class="headerlink" title="杂项设备miscdevs"></a>杂项设备miscdevs</h3><p>简化的字符设备：牺牲通用性，换取使用的方便</p>
+<h3 id="虚拟设备"><a href="#虚拟设备" class="headerlink" title="虚拟设备"></a>虚拟设备</h3><p>对内核的功能扩展，伪设备pseudo devices</p>
+<p>如随机数发生器/dev/random，空设备/dev/null，零设备/dev/zero</p>
+<h2 id="模块"><a href="#模块" class="headerlink" title="模块"></a>模块</h2><h3 id="hello-world"><a href="#hello-world" class="headerlink" title="hello, world"></a>hello, world</h3><pre class=" language-c"><code class="language-c"><span class="token keyword">static</span> <span class="token keyword">int</span> <span class="token function">hello_init</span><span class="token punctuation">(</span><span class="token keyword">void</span><span class="token punctuation">)</span> 
+<span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+<span class="token function">printk</span><span class="token punctuation">(</span>KERN_ALERT “I bear a charmed life<span class="token punctuation">.</span>\n”<span class="token punctuation">)</span><span class="token punctuation">;</span> 
+<span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+<span class="token comment" spellcheck="true">/*
+* hello_exit – the exit function, called when the module is removed.
+*/</span> 
+<span class="token keyword">static</span> <span class="token keyword">void</span> <span class="token function">hello_exit</span><span class="token punctuation">(</span><span class="token keyword">void</span><span class="token punctuation">)</span> 
+<span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+<span class="token function">printk</span><span class="token punctuation">(</span>KERN_ALERT “Out<span class="token punctuation">,</span> out<span class="token punctuation">,</span> brief candle<span class="token operator">!</span>\n”<span class="token punctuation">)</span><span class="token punctuation">;</span> 
+<span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+
+<span class="token function">module_init</span><span class="token punctuation">(</span>hello_init<span class="token punctuation">)</span><span class="token punctuation">;</span> 
+<span class="token function">module_exit</span><span class="token punctuation">(</span>hello_exit<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token function">MODULE_LICENSE</span><span class="token punctuation">(</span>“GPL”<span class="token punctuation">)</span><span class="token punctuation">;</span> 
+<span class="token function">MODULE_AUTHOR</span><span class="token punctuation">(</span>“Shakespeare”<span class="token punctuation">)</span><span class="token punctuation">;</span> 
+<span class="token function">MODULE_DESCRIPTION</span><span class="token punctuation">(</span>“A Hello<span class="token punctuation">,</span> World Module”<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>module_init()和module_exit()都是宏，唯一参数为初始化函数，类型为int my_init(void);</p>
+<p>如果载入非GPL模块，不能被调试，不能调用GPL_only符号</p>
+<p>剩下两个没啥用</p>
+<h3 id="构建模块"><a href="#构建模块" class="headerlink" title="构建模块"></a>构建模块</h3><p>2.6内核采用kbuild，构建模块更容易，第一步选择哪里管理源码：</p>
 <ol>
-<li>提速</li>
-<li>局部性原理</li>
+<li>模块源码加入内核源码树</li>
+<li>内核代码树外构建模块源码</li>
 </ol>
-<h2 id="缓存手段"><a href="#缓存手段" class="headerlink" title="缓存手段"></a>缓存手段</h2><p>page cache:物理内存，对应磁盘的物理块</p>
-<p>size动态</p>
-<p>称为backing store（后背存储）</p>
-<p>内核执行读操作，先检查是否在page cache中</p>
-<p>缓存以页为单位，而不是文件</p>
-<h3 id="写缓存"><a href="#写缓存" class="headerlink" title="写缓存"></a>写缓存</h3><ol>
-<li>不缓存nowrite</li>
-<li>写透缓存write-through，双方都写</li>
-<li>回写write-back</li>
-</ol>
-<h3 id="缓存回收-cache-eviction"><a href="#缓存回收-cache-eviction" class="headerlink" title="缓存回收 cache eviction"></a>缓存回收 cache eviction</h3><p>决定撤销哪些cache的策略</p>
-<p>linux:选clean页</p>
-<p> clairvoyant algorithm预测算法：无法实现</p>
-<h4 id="1-最近最少使用LRU"><a href="#1-最近最少使用LRU" class="headerlink" title="1 最近最少使用LRU"></a>1 最近最少使用LRU</h4><h4 id="2-双链策略"><a href="#2-双链策略" class="headerlink" title="2 双链策略"></a>2 双链策略</h4><p>活跃链表active list:不可换出</p>
-<p>inactive list</p>
-<p>两个链表需要维持平衡，解决了LRU算法仅对一次访问的窘境</p>
-<p>称为LRU/2,也可扩展到n个链表LRU/n</p>
-<h2 id="linux-page-cache"><a href="#linux-page-cache" class="headerlink" title="linux page cache"></a>linux page cache</h2><h3 id="address-space-对象"><a href="#address-space-对象" class="headerlink" title="address_space 对象"></a>address_space 对象</h3><p>page cache中的一夜可以包含多个不连续的物理块</p>
-<p>由于不连续性，检查一个数据是否在cache中不容易</p>
-<p>不能直接用设备名+块号寻找cache</p>
-<p>可以用page cache扩展inode 结构体：会让page cache 局限于文件</p>
-<p>为了维持普遍性，采用address_space结构体</p>
-<p>是vm_area_struct的物理地址对等体</p>
-<p>一个文件可以被10个vm_area_struct标识，但只能被一个addres_space标识</p>
-<p>文不对题，应该叫page_cache_entity或physical_pages_of_a_file</p>
-<p>定义在&lt;linux/fs.h&gt;</p>
-<pre><code>struct address_space&#123;
-    struct inode            *host;
-    ...
-    struct prio_tree_root     i_mmap;
+<h3 id="安装模块"><a href="#安装模块" class="headerlink" title="安装模块"></a>安装模块</h3><h3 id="模块依赖性"><a href="#模块依赖性" class="headerlink" title="模块依赖性"></a>模块依赖性</h3><p>必须事先生成依赖关系</p>
+<pre><code>depmod
+</code></pre>
+<p>生成依赖关系信息</p>
+<p>依赖信息存放在/lib/modules/version/modules.dep</p>
+<h3 id="载入模块"><a href="#载入模块" class="headerlink" title="载入模块"></a>载入模块</h3><p>root权限 insmod</p>
+<p>modprobe提供了依赖性分析</p>
+<pre><code>modprobe module [ module paras ]
+</code></pre>
+<h3 id="管理配置选项"><a href="#管理配置选项" class="headerlink" title="管理配置选项"></a>管理配置选项</h3><p>对于薪资目录建立kconfig,要在存在的kconfig文件中引入</p>
+<p>source “driver/char/fishing/Kconfig”</p>
+<p>添加一个配置选项</p>
+<pre><code>config FISHING_POLE 
+tristate “Fish Master 3000 support” 
+default n 
+help
+If you say Y here...
+</code></pre>
+<p>添加依赖型：</p>
+<p>depends on FISH_TANK</p>
+<p>配置系统元选项</p>
+<p>CONFIG_BROKEN_ON_SMP：驱动非多处理器安全，用于告知风险</p>
+<p>CONFIG——EXPERIMENTAL：告知风险</p>
+<h3 id="参数模块"><a href="#参数模块" class="headerlink" title="参数模块"></a>参数模块</h3><pre><code>module_param(name, type, perm);
+</code></pre>
+<p>定义的全局变量，同时出现在sysfs文件系统</p>
+<p>perm制定了sysfs下的权限</p>
+<p>例子</p>
+<pre><code>static int allow_live_bait = 1; /* default to on */ 
+module_param(allow_live_bait, bool, 0644); /* a Boolean type */
+</code></pre>
+<p>外部参数名与内部不同：</p>
+<pre><code>static unsigned int max_test = DEFAULT_MAX_LINE_TEST; 
+module_param_named(maximum_line_test, max_test, int, 0);
+</code></pre>
+<h3 id="导出符号表"><a href="#导出符号表" class="headerlink" title="导出符号表"></a>导出符号表</h3><p>导出内核函数，才能被模块直接使用</p>
+<p>需要指令EXPORT_SYMBOL()和EXPORT_SYMBOL_GPL()</p>
+<pre><code>int get_pirate_beard_color(struct pirate *p) 
+&#123;
+return p-&gt;beard.color; 
+&#125; 
+EXPORT_SYMBOL(get_pirate_beard_color);
+</code></pre>
+<p>然后get_pirate_beard_color可以被所有模块访问</p>
+<p>确保自己的模块使用的所有接口，都被导出</p>
+<h2 id="设备模型"><a href="#设备模型" class="headerlink" title="设备模型"></a>设备模型</h2><p>独立机制表示设备</p>
+<ul>
+<li>重复代码最小化</li>
+<li>引用计数这样的统一机制</li>
+<li>所有设备以树的形式出现</li>
+<li>方便关闭电源</li>
+</ul>
+<h3 id="kobject"><a href="#kobject" class="headerlink" title="kobject"></a>kobject</h3><p>设备模型的核心，类似对象</p>
+<pre class=" language-c"><code class="language-c"><span class="token keyword">struct</span> kobject <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> <span class="token keyword">char</span>            <span class="token operator">*</span>name<span class="token punctuation">;</span>
+    <span class="token keyword">struct</span> list_head    entry<span class="token punctuation">;</span>
+    <span class="token keyword">struct</span> kobject         <span class="token operator">*</span>parent<span class="token punctuation">;</span>    <span class="token comment" spellcheck="true">/*构建设备树，即为sysfs*/</span>
+    <span class="token keyword">struct</span> kset         <span class="token operator">*</span>kset<span class="token punctuation">;</span> 
+    <span class="token keyword">struct</span> kobj_type     <span class="token operator">*</span>ktype<span class="token punctuation">;</span>
+    <span class="token keyword">struct</span> sysfs_dirent <span class="token operator">*</span>sd<span class="token punctuation">;</span>        <span class="token comment" spellcheck="true">/*sysfs文件系统中，表示kobject的inode*/</span>
+    <span class="token keyword">struct</span> kref            kref<span class="token punctuation">;</span>        <span class="token comment" spellcheck="true">/*提供引用计数*/</span>
+    <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+<span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span>
+</code></pre>
+<p>通常嵌入别的结构体，如struct cdev</p>
+<p>kobject嵌入其它机构时，该结构拥有kobject提供的标准功能</p>
+<p>并成为层次架构的一部分</p>
+<h3 id="ktype"><a href="#ktype" class="headerlink" title="ktype"></a>ktype</h3><p>kobject type, &lt;linux/kobject.h&gt;中</p>
+<pre class=" language-c"><code class="language-c"><span class="token keyword">struct</span> kobj_type <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span> 
+    <span class="token keyword">void</span> <span class="token punctuation">(</span><span class="token operator">*</span>release<span class="token punctuation">)</span><span class="token punctuation">(</span><span class="token keyword">struct</span> kobject <span class="token operator">*</span><span class="token punctuation">)</span><span class="token punctuation">;</span>                <span class="token comment" spellcheck="true">/*析构函数*/</span> 
+    <span class="token keyword">const</span> <span class="token keyword">struct</span> sysfs_ops         <span class="token operator">*</span>sysfs_ops<span class="token punctuation">;</span>         <span class="token comment" spellcheck="true">//描述sysfs读写时的特性</span>
+    <span class="token keyword">struct</span> attribute             <span class="token operator">*</span><span class="token operator">*</span>default_attrs<span class="token punctuation">;</span>    <span class="token comment" spellcheck="true">//描述了kobject的默认属性</span>
+<span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span><span class="token punctuation">;</span>
+</code></pre>
+<h3 id="kset"><a href="#kset" class="headerlink" title="kset"></a>kset</h3><p>kobject对象的集合体.把所有相关的kobject放到同一位置</p>
+<p>少数的ktype,多个kset</p>
+<pre class=" language-c"><code class="language-c"><span class="token keyword">struct</span> kset <span class="token operator">&amp;</span>#<span class="token number">123</span><span class="token punctuation">;</span> 
+    <span class="token keyword">struct</span> list_head         list<span class="token punctuation">;</span>            <span class="token comment" spellcheck="true">//链接所有kobject</span>
+    spinlock_t                 list_lock<span class="token punctuation">;</span>         <span class="token comment" spellcheck="true">//保护这个链表中元素的自旋锁</span>
+    <span class="token keyword">struct</span> kobject             kobj<span class="token punctuation">;</span>             <span class="token comment" spellcheck="true">//集合元素的基类</span>
+    <span class="token keyword">struct</span> kset_uevent_ops     <span class="token operator">*</span>uevent_ops<span class="token punctuation">;</span>    <span class="token comment" spellcheck="true">//处理集合中kobject的热插拔操作</span>
+    <span class="token comment" spellcheck="true">// uevent:用户事件的缩写</span>
+<span class="token operator">&amp;</span>#<span class="token number">125</span><span class="token punctuation">;</span><span class="token punctuation">;</span>
+</code></pre>
+<h3 id="相互关系"><a href="#相互关系" class="headerlink" title="相互关系"></a>相互关系</h3><p>相同kset的kobject以独立的目录出现在文件系统</p>
+<h3 id="操作管理kobject"><a href="#操作管理kobject" class="headerlink" title="操作管理kobject"></a>操作管理kobject</h3><h3 id="引用计数"><a href="#引用计数" class="headerlink" title="引用计数"></a>引用计数</h3><p>类似inode</p>
+<h2 id="sysfs"><a href="#sysfs" class="headerlink" title="sysfs"></a>sysfs</h2><p>虚拟文件系统，提供了kobject对象层次的视图</p>
+<p>挂载在sys目录下</p>
+<p>将kobject与目录项紧密联系，通过kobject中的dentry实现</p>
+<p>目录devices</p>
+<h3 id="在sysfs添加删除kobject"><a href="#在sysfs添加删除kobject" class="headerlink" title="在sysfs添加删除kobject"></a>在sysfs添加删除kobject</h3><h3 id="向sysfs添加文件"><a href="#向sysfs添加文件" class="headerlink" title="向sysfs添加文件"></a>向sysfs添加文件</h3><h4 id="1-默认属性"><a href="#1-默认属性" class="headerlink" title="1.默认属性"></a>1.默认属性</h4><p>ktype中包含attribute结构体，定义在&lt;linux/sysfs.h&gt;</p>
+<pre><code>struct attribute&#123;
+    const char         *name;        //属性名称，出现在sysfs中的文件名
+    struct module    *owner;
+    mode_t            mode;        //sysfs中该文件的权限
 &#125;
 </code></pre>
-<p>i_mmap所有这个address space内的映射的有限搜索树</p>
-<p>往往会和一些内核对象关联，通常情况下和一个索引节点关联inode</p>
-<p>此时host域指向索引节点</p>
-<p>和swapper关联，host域置为NULL</p>
-<h3 id="address-space-操作"><a href="#address-space-操作" class="headerlink" title="address_space 操作"></a>address_space 操作</h3><p>readpage()和writepage()最重要</p>
-<p>读操作包含的步骤：</p>
-<p>在页高速缓存找到需要的数据,find_get_page负责完成</p>
-<pre><code>page = find_get_page(address_space mapping, offset index)
+<p>sysfs_ops描述了如何使用属性</p>
+<p>show()读属性,store()写属性</p>
+<h4 id="2-创建新属性"><a href="#2-创建新属性" class="headerlink" title="2.创建新属性"></a>2.创建新属性</h4><pre><code>/*添加新属性,最终出现在sysfs中的文件名*/
+int syss_create_file(struct kobject *kobj, const struct attribute *attr);
+/*创建符号链接*/
+int sysfs_create_link(struct kobject *kobj, struct kobject *target, char *name);
+/*删除新属性*/
+void sysfs_remove_file(struct kobject *kobj, const struct attribute *attr);
 </code></pre>
-<p>如果搜索的页不在cache，会返回NULL，并分配新页面加入cache</p>
-<p>需要的数据从磁盘中读入，再写到page cache中，然后返回给用户</p>
-<pre><code>error = mapping-&gt;a_ops_readpage(file, page);
+<p>sysfs约定：</p>
+<p>保证每个文件导出一个值，文本形式，映射为简单C类型</p>
+<p>sysfs树形的实际用途得看源代码</p>
+<h3 id="17-4-3-内核事件层"><a href="#17-4-3-内核事件层" class="headerlink" title="17.4.3 内核事件层"></a>17.4.3 内核事件层</h3><p>内核到用户的消息通知系统</p>
+<p>通过kobject和sysfs，能很好标识时间的源(一个sysfs路径)</p>
+<pre><code>int kobject_uevent(struct kobject *kobj, enum kobject_action action);
 </code></pre>
-<p>写操作对于mapping只需要</p>
-<pre><code>SetPageDirty(page);
-</code></pre>
-<p>晚些时候调用writepage()</p>
-<pre><code>// 在page_cahce中搜索页
-page = __grab_cache_page(mapping, index, &amp;cached_page, &amp;lru_pvec); 
-// 创建写请求
-status = a_ops-&gt;prepare_write(file, page, offset, offset+bytes); 
-// 写数据从用户空间拷贝到内核空间
-page_fault = filemap_copy_from_user(page, offset, buf, bytes); 
-// page写入磁盘
-status = a_ops-&gt;commit_write(file, page, offset, offset+bytes);
-</code></pre>
-<h3 id="基树-radix-tree"><a href="#基树-radix-tree" class="headerlink" title="基树 radix tree"></a>基树 radix tree</h3><p>任何页IO操作前，内核都要检查页是否在cache</p>
-<p>因此查找必须高效</p>
-<p>每个address_space必须有唯一的基树，保存在page_tree结构体</p>
-<p>基树是二叉树，只要指定偏移量，就能迅速检索，find_get_page调用radix_tree_lookup()</p>
-<p>核心代码在lib/radix-tree.c中</p>
-<h3 id="以前的页散列表"><a href="#以前的页散列表" class="headerlink" title="以前的页散列表"></a>以前的页散列表</h3><p>维护了系统中所有页的全局散列表</p>
-<h2 id="缓冲区高速缓存buffer-cache"><a href="#缓冲区高速缓存buffer-cache" class="headerlink" title="缓冲区高速缓存buffer cache"></a>缓冲区高速缓存buffer cache</h2><p>减少磁盘访问，作为页高速缓存的一部分</p>
-<p>缓冲和页高速缓存并非天生统一</p>
-<p>2.4前一个磁盘块可以同时在两个缓存中</p>
-<h2 id="flusher线程"><a href="#flusher线程" class="headerlink" title="flusher线程"></a>flusher线程</h2><p>以下三种情况，脏页写回磁盘：</p>
-<ol>
-<li>空闲内存低于阈值</li>
-<li>脏页驻留时间超过阈值</li>
-<li>用户调用sync和fsync</li>
-</ol>
-<p>2.6中a gang of 内核线程，flusher线程完成三个工作</p>
-<p>周期性被唤醒，完成前两个工作</p>
-<p>/proc/sys/vm中设置回写的相关参数，也可以sysctl系统调用设置</p>
-<table>
-<thead>
-<tr>
-<th>变量</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>dirty_background_ratio</td>
-<td></td>
-</tr>
-<tr>
-<td>dirty_expire_interval</td>
-<td>超时多久</td>
-</tr>
-<tr>
-<td>dirty_ratio</td>
-<td></td>
-</tr>
-<tr>
-<td>dirty_writeback_interval</td>
-<td>pdflush运行频率</td>
-</tr>
-<tr>
-<td>laptop_mode</td>
-<td></td>
-</tr>
-</tbody></table>
-<h3 id="laptop-mode"><a href="#laptop-mode" class="headerlink" title="laptop mode"></a>laptop mode</h3><p>让硬盘机械行为最小化，允许硬盘长时间停止，延长电池时间</p>
-<p>找准时机，一次写磁盘写很多</p>
-<p>要求别的阈值也尽可能大</p>
-<p>多数linux会在充电时自动关闭，拔电源时自动开启</p>
-<h3 id="bdflush-kupdated和pdflush"><a href="#bdflush-kupdated和pdflush" class="headerlink" title="bdflush,kupdated和pdflush"></a>bdflush,kupdated和pdflush</h3><p>2.6前，前两者</p>
-<p>基于缓冲，只有一个bdflush</p>
-<p>2.6pdflush</p>
-<p>面向所有磁盘，容易拥塞</p>
-<p>2.6.32后flusher</p>
-<p>flusher针对每个磁盘独立执行回写</p>
-<h3 id="避免拥塞：多线程"><a href="#避免拥塞：多线程" class="headerlink" title="避免拥塞：多线程"></a>避免拥塞：多线程</h3><p>bdflush</p>
+<p>第一个参数为发送信号的kobject</p>
+<p>第二个为描述信号的动作或动词，枚举类型，映射相应的字符串</p>
 
                 
             </div>
@@ -531,7 +562,7 @@ status = a_ops-&gt;commit_write(file, page, offset, offset+bytes);
                     </i>
                 </span>
                 <span class="reprint-info">
-                    <a href="http://N1co3tine.github.io/2023/10/11/%E9%A1%B5%E9%AB%98%E9%80%9F%E7%BC%93%E5%AD%98%E5%92%8C%E9%A1%B5%E5%9B%9E%E5%86%99/">http://N1co3tine.github.io/2023/10/11/%E9%A1%B5%E9%AB%98%E9%80%9F%E7%BC%93%E5%AD%98%E5%92%8C%E9%A1%B5%E5%9B%9E%E5%86%99/</a>
+                    <a href="http://N1co3tine.github.io/2023/10/25/%E8%AE%BE%E5%A4%87%E4%B8%8E%E6%A8%A1%E5%9D%97/">http://N1co3tine.github.io/2023/10/25/%E8%AE%BE%E5%A4%87%E4%B8%8E%E6%A8%A1%E5%9D%97/</a>
                 </span>
             </div>
             <div class="reprint__notice">
@@ -616,9 +647,10 @@ status = a_ops-&gt;commit_write(file, page, offset, offset+bytes);
 <article id="prenext-posts" class="prev-next articles">
     <div class="row article-row">
         
-        <div class="article col s12 m6" data-aos="fade-up">
+        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
             <div class="article-badge left-badge text-color">
-                <i class="fas fa-chevron-left"></i>&nbsp;上一篇</div>
+                <i class="far fa-dot-circle"></i>&nbsp;本篇
+            </div>
             <div class="card">
                 <a href="/2023/10/25/%E8%AE%BE%E5%A4%87%E4%B8%8E%E6%A8%A1%E5%9D%97/">
                     <div class="card-image">
@@ -635,9 +667,9 @@ status = a_ops-&gt;commit_write(file, page, offset, offset+bytes);
                         
                     </div>
                     <div class="publish-info">
-                        <span class="publish-date">
-                            <i class="far fa-clock fa-fw icon-date"></i>2023-10-25
-                        </span>
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2023-10-25
+                            </span>
                         <span class="publish-author">
                             
                             <i class="fas fa-user fa-fw"></i>
@@ -646,6 +678,7 @@ status = a_ops-&gt;commit_write(file, page, offset, offset+bytes);
                         </span>
                     </div>
                 </div>
+
                 
                 <div class="card-action article-tags">
                     
@@ -664,12 +697,12 @@ status = a_ops-&gt;commit_write(file, page, offset, offset+bytes);
                 下一篇&nbsp;<i class="fas fa-chevron-right"></i>
             </div>
             <div class="card">
-                <a href="/2023/10/07/%E8%BF%9B%E7%A8%8B%E5%9C%B0%E5%9D%80%E7%A9%BA%E9%97%B4/">
+                <a href="/2023/10/11/%E9%A1%B5%E9%AB%98%E9%80%9F%E7%BC%93%E5%AD%98%E5%92%8C%E9%A1%B5%E5%9B%9E%E5%86%99/">
                     <div class="card-image">
                         
-                        <img src="/images/cover8.jpg" class="responsive-img" alt="进程地址空间">
+                        <img src="/images/cover9.jpg" class="responsive-img" alt="页高速缓存和页回写">
                         
-                        <span class="card-title">进程地址空间</span>
+                        <span class="card-title">页高速缓存和页回写</span>
                     </div>
                 </a>
                 <div class="card-content article-content">
@@ -680,7 +713,7 @@ status = a_ops-&gt;commit_write(file, page, offset, offset+bytes);
                     </div>
                     <div class="publish-info">
                             <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2023-10-07
+                                <i class="far fa-clock fa-fw icon-date"></i>2023-10-11
                             </span>
                         <span class="publish-author">
                             
