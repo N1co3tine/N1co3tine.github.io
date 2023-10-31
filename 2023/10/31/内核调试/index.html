@@ -4,8 +4,15 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="keywords" content="标签: study, N1co5in3&#39;s Blog">
-    <meta name="description" content="边缘pwn手，考研中">
+    <meta name="keywords" content="内核调试, N1co5in3&#39;s Blog">
+    <meta name="description" content="调试准备开始用户级的程序bug常常直截了当
+内核中的bug不清晰
+重现bug时，成功一大半
+内核中的bug独特的问题：定时限制，条件竞争
+通过打印来调试printk()函数
+健壮性随时可调用
+在中断初始化后，都可以使用
+日志等级最重要的KE">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="renderer" content="webkit|ie-stand|ie-comp">
@@ -17,7 +24,7 @@
     <!-- Global site tag (gtag.js) - Google Analytics -->
 
 
-    <title>标签: study | N1co5in3&#39;s Blog</title>
+    <title>内核调试 | N1co5in3&#39;s Blog</title>
     <link rel="icon" type="image/png" href="/favicon.png">
     
 
@@ -306,136 +313,418 @@
 
 </header>
 
-    <div class="bg-cover pd-header about-cover">
-    <div class="container">
+    
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/images/cover12.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">内核调试</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
     <div class="row">
-    <div class="col s10 offset-s1 m8 offset-m2 l8 offset-l2">
-        <div class="brand">
-            <div class="title center-align">
-                
-                N1co5in3
-                
-            </div>
-
-            <div class="description center-align">
-                
-                <span id="subtitle"></span>
-                <script src="/libs/typed/typed.js"></script>
-                <script>
-                    var typed = new Typed("#subtitle", {
-                        strings: [ 
-                            
-                                "在有意义的痛苦中成长",
-                            
-                                "Grow in meaningful bitterness",
-                            
-                        ],
-                        startDelay: 300,
-                        typeSpeed: 100,
-                        loop: true,
-                        backSpeed: 50,
-                        showCursor: true
-                    });
-                </script>
-                
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<script>
-    // 每天切换 banner 图.  Switch banner image every day.
-    var bannerUrl = "/medias/banner/" + new Date().getDay() + '.jpg';
-    $('.bg-cover').css('background-image', 'url(' + bannerUrl + ')');
-</script>
-
-
-    </div>
-</div>
-
-<main class="content">
-
-    
-
-<div id="tags" class="container chip-container">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
     <div class="card">
-        <div class="card-content">
-            <div class="tag-title center-align">
-                <i class="fas fa-tags"></i>&nbsp;&nbsp;文章标签
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/study-notes/">
+                                <span class="chip bg-color">study notes</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                </div>
             </div>
-            <div class="tag-chips">
+
+            <div class="post-info">
                 
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2023-10-31
+                </div>
                 
-                <a href="/tags/writeup/" title="writeup: 3">
-                    <span class="chip center-align waves-effect waves-light
-                             chip-default "
-                            data-tagname="writeup" style="background-color: #F9EBEA;">writeup
-                        <span class="tag-length">3</span>
-                    </span>
-                </a>
+
                 
+
                 
-                <a href="/tags/study/" title="study: 1">
-                    <span class="chip center-align waves-effect waves-light
-                             chip-active "
-                            data-tagname="study" style="background-color: #F5EEF8;">study
-                        <span class="tag-length">1</span>
-                    </span>
-                </a>
+
                 
-                
-                <a href="/tags/study-notes/" title="study notes: 8">
-                    <span class="chip center-align waves-effect waves-light
-                             chip-default "
-                            data-tagname="study notes" style="background-color: #D5F5E3;">study notes
-                        <span class="tag-length">8</span>
-                    </span>
-                </a>
+
                 
             </div>
         </div>
+        <hr class="clearfix">
+
+        
+
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <h1 id="调试"><a href="#调试" class="headerlink" title="调试"></a>调试</h1><h2 id="准备开始"><a href="#准备开始" class="headerlink" title="准备开始"></a>准备开始</h2><p>用户级的程序bug常常直截了当</p>
+<p>内核中的bug不清晰</p>
+<p>重现bug时，成功一大半</p>
+<h2 id="内核中的bug"><a href="#内核中的bug" class="headerlink" title="内核中的bug"></a>内核中的bug</h2><p>独特的问题：定时限制，条件竞争</p>
+<h2 id="通过打印来调试"><a href="#通过打印来调试" class="headerlink" title="通过打印来调试"></a>通过打印来调试</h2><p>printk()函数</p>
+<h3 id="健壮性"><a href="#健壮性" class="headerlink" title="健壮性"></a>健壮性</h3><p>随时可调用</p>
+<p>在中断初始化后，都可以使用</p>
+<h3 id="日志等级"><a href="#日志等级" class="headerlink" title="日志等级"></a>日志等级</h3><p>最重要的KERN_EMERG定为0，无关紧要的KERN_DEBUG定为7</p>
+<h3 id="记录缓冲区"><a href="#记录缓冲区" class="headerlink" title="记录缓冲区"></a>记录缓冲区</h3><p>内核消息保存在一个LOG_BUF_LEN的环形队列</p>
+<p>超过大小，新消息覆盖老消息</p>
+<h3 id="syslogd和klogd"><a href="#syslogd和klogd" class="headerlink" title="syslogd和klogd"></a>syslogd和klogd</h3><p>用户空间的守护进程klogd从记录缓冲区获取内核消息</p>
+<p>通过syslogd守护进程保存在系统日志记录中</p>
+<h2 id="18-4-oops"><a href="#18-4-oops" class="headerlink" title="18.4 oops"></a>18.4 oops</h2><p>向中断输出错误消息，寄存器信息，可供跟踪的回溯线索</p>
+<h3 id="ksymoops"><a href="#ksymoops" class="headerlink" title="ksymoops"></a>ksymoops</h3><p>未解码的oops通过ksymoops指令，转化为有意义的符号</p>
+<h3 id="kallsyms"><a href="#kallsyms" class="headerlink" title="kallsyms"></a>kallsyms</h3><p>定义CONFIG_KALLSYMS选项，在内核启动时创建地址到符号名称的映射</p>
+<p>这会使得内核变大</p>
+<p>CONFIG_KALLSYMS_ALL：还存放所有的符号名称</p>
+<h2 id="18-5-内核调试配置选项"><a href="#18-5-内核调试配置选项" class="headerlink" title="18.5 内核调试配置选项"></a>18.5 内核调试配置选项</h2><p>为了方便调试测试内核代码，提供了许多配置选项</p>
+<p>在内核配置编辑器的内核开发菜单项</p>
+<pre><code>CONFIG_PREEMPT=y
+CONFIG_DEBUG_KERNEL=y 
+CONFIG_KALLSYMS=y 
+CONFIG_DEBUG_SPINLOCK_SLEEP=y
+</code></pre>
+<h2 id="18-6-引发bug并打印信息"><a href="#18-6-引发bug并打印信息" class="headerlink" title="18.6 引发bug并打印信息"></a>18.6 引发bug并打印信息</h2><h2 id="神奇的系统请求键"><a href="#神奇的系统请求键" class="headerlink" title="神奇的系统请求键"></a>神奇的系统请求键</h2><p>magic sysrq key</p>
+<p>sysrq键：alt-PrintScreen</p>
+<p>无论内核什么状态，都可以和内核通信</p>
+<h2 id="内核调试器"><a href="#内核调试器" class="headerlink" title="内核调试器"></a>内核调试器</h2><h2 id="探测系统"><a href="#探测系统" class="headerlink" title="探测系统"></a>探测系统</h2><h3 id="用UID做选择条件"><a href="#用UID做选择条件" class="headerlink" title="用UID做选择条件"></a>用UID做选择条件</h3><p>专门测试新算法</p>
+<h3 id="使用条件变量"><a href="#使用条件变量" class="headerlink" title="使用条件变量"></a>使用条件变量</h3><h3 id="使用统计量"><a href="#使用统计量" class="headerlink" title="使用统计量"></a>使用统计量</h3><h3 id="限制重复限制"><a href="#限制重复限制" class="headerlink" title="限制重复限制"></a>限制重复限制</h3><h2 id="用二分查找法查找内核版本"><a href="#用二分查找法查找内核版本" class="headerlink" title="用二分查找法查找内核版本"></a>用二分查找法查找内核版本</h2><h2 id="用git二分搜索"><a href="#用git二分搜索" class="headerlink" title="用git二分搜索"></a>用git二分搜索</h2><h2 id="社区"><a href="#社区" class="headerlink" title="社区"></a>社区</h2>
+                
+            </div>
+            <hr/>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="/about" rel="external nofollow noreferrer">N1co5in3</a>
+                </span>
+            </div>
+            <div class="reprint__type">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-link">
+                        文章链接:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="http://N1co3tine.github.io/2023/10/31/%E5%86%85%E6%A0%B8%E8%B0%83%E8%AF%95/">http://N1co3tine.github.io/2023/10/31/%E5%86%85%E6%A0%B8%E8%B0%83%E8%AF%95/</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。转载请注明来源
+                    <a href="/about" target="_blank">N1co5in3</a>
+                    !
+                </span>
+            </div>
+        
     </div>
-</div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/study-notes/">
+                                    <span class="chip bg-color">study notes</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+    <script src="/libs/share/js/social-share.min.js"></script>
+    
 
     
 
-    <article id="articles" class="container articles">
-        <div class="row tags-posts">
-            
-            
-            <div class="article tag-post col s12 m6 l4" data-tags="study" data-aos="fade-up">
-                <div class="card">
-                    <a href="/2022/12/16/game%E9%9D%9E%E9%A2%84%E6%9C%9F/">
-                        <div class="card-image tag-image">
-                            
-                            <img src="/images/cover2.jpg" class="responsive-img" alt="game非预期">
-                            
-                            <span class="card-title">game非预期</span>
-                        </div>
-                    </a>
-                    <div class="card-content article-content">
-                        <div class="publish-info">
-                            <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2022-12-16
-                            </span>
-                            <span class="publish-author">
-                                
-                                <i class="fas fa-bookmark fa-fw icon-category"></i>
-                                
-                                <a href="/categories/pwn/" class="post-category">
-                                pwn
-                                </a>
-                                
-                                
-                            </span>
-                        </div>
-                    </div>
+</div>
+
                 </div>
             </div>
             
         </div>
-    </article>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="far fa-dot-circle"></i>&nbsp;本篇
+            </div>
+            <div class="card">
+                <a href="/2023/10/31/%E5%86%85%E6%A0%B8%E8%B0%83%E8%AF%95/">
+                    <div class="card-image">
+                        
+                        <img src="/images/cover12.jpg" class="responsive-img" alt="内核调试">
+                        
+                        <span class="card-title">内核调试</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2023-10-31
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-user fa-fw"></i>
+                            N1co5in3
+                            
+                        </span>
+                    </div>
+                </div>
+
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/study-notes/">
+                        <span class="chip bg-color">study notes</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/2023/10/31/2023ACTF-blind/">
+                    <div class="card-image">
+                        
+                        <img src="/images/cover11.jpg" class="responsive-img" alt="2023ACTF_blind">
+                        
+                        <span class="card-title">2023ACTF_blind</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2023-10-31
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-bookmark fa-fw icon-category"></i>
+                            
+                            <a href="/categories/pwn/" class="post-category">
+                                    pwn
+                                </a>
+                            
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/writeup/">
+                        <span class="chip bg-color">writeup</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+
+
+<!-- 代码语言 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeLang.js"></script>
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeShrink.js"></script>
+
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card" style="background-color: white;">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
 </main>
 
 

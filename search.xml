@@ -4,6 +4,25 @@
   
     
     <entry>
+      <title>内核调试</title>
+      <link href="/2023/10/31/%E5%86%85%E6%A0%B8%E8%B0%83%E8%AF%95/"/>
+      <url>/2023/10/31/%E5%86%85%E6%A0%B8%E8%B0%83%E8%AF%95/</url>
+      
+        <content type="html"><![CDATA[<h1 id="调试"><a href="#调试" class="headerlink" title="调试"></a>调试</h1><h2 id="准备开始"><a href="#准备开始" class="headerlink" title="准备开始"></a>准备开始</h2><p>用户级的程序bug常常直截了当</p><p>内核中的bug不清晰</p><p>重现bug时，成功一大半</p><h2 id="内核中的bug"><a href="#内核中的bug" class="headerlink" title="内核中的bug"></a>内核中的bug</h2><p>独特的问题：定时限制，条件竞争</p><h2 id="通过打印来调试"><a href="#通过打印来调试" class="headerlink" title="通过打印来调试"></a>通过打印来调试</h2><p>printk()函数</p><h3 id="健壮性"><a href="#健壮性" class="headerlink" title="健壮性"></a>健壮性</h3><p>随时可调用</p><p>在中断初始化后，都可以使用</p><h3 id="日志等级"><a href="#日志等级" class="headerlink" title="日志等级"></a>日志等级</h3><p>最重要的KERN_EMERG定为0，无关紧要的KERN_DEBUG定为7</p><h3 id="记录缓冲区"><a href="#记录缓冲区" class="headerlink" title="记录缓冲区"></a>记录缓冲区</h3><p>内核消息保存在一个LOG_BUF_LEN的环形队列</p><p>超过大小，新消息覆盖老消息</p><h3 id="syslogd和klogd"><a href="#syslogd和klogd" class="headerlink" title="syslogd和klogd"></a>syslogd和klogd</h3><p>用户空间的守护进程klogd从记录缓冲区获取内核消息</p><p>通过syslogd守护进程保存在系统日志记录中</p><h2 id="18-4-oops"><a href="#18-4-oops" class="headerlink" title="18.4 oops"></a>18.4 oops</h2><p>向中断输出错误消息，寄存器信息，可供跟踪的回溯线索</p><h3 id="ksymoops"><a href="#ksymoops" class="headerlink" title="ksymoops"></a>ksymoops</h3><p>未解码的oops通过ksymoops指令，转化为有意义的符号</p><h3 id="kallsyms"><a href="#kallsyms" class="headerlink" title="kallsyms"></a>kallsyms</h3><p>定义CONFIG_KALLSYMS选项，在内核启动时创建地址到符号名称的映射</p><p>这会使得内核变大</p><p>CONFIG_KALLSYMS_ALL：还存放所有的符号名称</p><h2 id="18-5-内核调试配置选项"><a href="#18-5-内核调试配置选项" class="headerlink" title="18.5 内核调试配置选项"></a>18.5 内核调试配置选项</h2><p>为了方便调试测试内核代码，提供了许多配置选项</p><p>在内核配置编辑器的内核开发菜单项</p><pre><code>CONFIG_PREEMPT=yCONFIG_DEBUG_KERNEL=y CONFIG_KALLSYMS=y CONFIG_DEBUG_SPINLOCK_SLEEP=y</code></pre><h2 id="18-6-引发bug并打印信息"><a href="#18-6-引发bug并打印信息" class="headerlink" title="18.6 引发bug并打印信息"></a>18.6 引发bug并打印信息</h2><h2 id="神奇的系统请求键"><a href="#神奇的系统请求键" class="headerlink" title="神奇的系统请求键"></a>神奇的系统请求键</h2><p>magic sysrq key</p><p>sysrq键：alt-PrintScreen</p><p>无论内核什么状态，都可以和内核通信</p><h2 id="内核调试器"><a href="#内核调试器" class="headerlink" title="内核调试器"></a>内核调试器</h2><h2 id="探测系统"><a href="#探测系统" class="headerlink" title="探测系统"></a>探测系统</h2><h3 id="用UID做选择条件"><a href="#用UID做选择条件" class="headerlink" title="用UID做选择条件"></a>用UID做选择条件</h3><p>专门测试新算法</p><h3 id="使用条件变量"><a href="#使用条件变量" class="headerlink" title="使用条件变量"></a>使用条件变量</h3><h3 id="使用统计量"><a href="#使用统计量" class="headerlink" title="使用统计量"></a>使用统计量</h3><h3 id="限制重复限制"><a href="#限制重复限制" class="headerlink" title="限制重复限制"></a>限制重复限制</h3><h2 id="用二分查找法查找内核版本"><a href="#用二分查找法查找内核版本" class="headerlink" title="用二分查找法查找内核版本"></a>用二分查找法查找内核版本</h2><h2 id="用git二分搜索"><a href="#用git二分搜索" class="headerlink" title="用git二分搜索"></a>用git二分搜索</h2><h2 id="社区"><a href="#社区" class="headerlink" title="社区"></a>社区</h2>]]></content>
+      
+      
+      
+        <tags>
+            
+            <tag> study notes </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>2023ACTF_blind</title>
       <link href="/2023/10/31/2023ACTF-blind/"/>
       <url>/2023/10/31/2023ACTF-blind/</url>
